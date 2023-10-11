@@ -4,6 +4,7 @@ import RootNavigator from "./navigation/RootNavigator";
 import ThemeProvider from "./themes/ThemeContext";
 
 export default function App() {
+  
   return (
     <SafeAreaProvider>
       <StatusBar style="auto" />
