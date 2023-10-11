@@ -8,7 +8,7 @@
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/homehelpersplash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": ["**/*"],
