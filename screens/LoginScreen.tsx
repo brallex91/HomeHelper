@@ -1,11 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Text, Checkbox, Button, TextInput } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
+import { Button, Checkbox, Text, TextInput } from "react-native-paper";
+import CreateHousehold from "../components/houseHoldGenComponent";
 import Login from "../components/loginComponent";
 import Register from "../components/signUpComponent";
-import CreateHousehold from "../components/houseHoldGenComponent";
 
 export default function LoginScreen() {
   const [checked, setChecked] = useState(false);
