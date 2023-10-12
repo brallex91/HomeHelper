@@ -2,8 +2,9 @@
 
 # dependencies
 node_modules/
-
+firebaseConfig.tsx
 # Expo
+.env
 .expo/
 dist/
 web-build/
