@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text, Checkbox, Button, TextInput } from "react-native-paper";
@@ -40,7 +41,7 @@ export default function LoginScreen() {
       <Button
         buttonColor="green"
         mode="contained"
-        onPress={() => navigation.navigate("Home")} /// har lagt till detta så vi kan ta oss till startsidan.
+        onPress={() => navigation.navigate("Hushållet")} /// har lagt till detta så vi kan ta oss till startsidan.
         style={styles.button}
       >
         Login
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  
+
   topText: {
     flex: 1,
     margin: 16,
