@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { FlatList, View } from "react-native";
-import { Text } from "react-native-paper";
+import { FlatList, StyleSheet, View } from "react-native";
+import { Card, Text } from "react-native-paper";
 import { getChores } from "../../api/chores";
 
 export default function HomeComponent() {
@@ -19,18 +19,35 @@ export default function HomeComponent() {
     fetchChores();
   }, []);
 
+  const choreCard = ({ item }: { item: Chore }) => (
+    <Card style={styles.card}>
+      <Card.Title
+        title={item.name}
+        right={(props) => <Text style={styles.userIcons}>🐷</Text>}
+      />
+    </Card>
+  );
+
   return (
-    <View>
-      <Text>Home Component</Text>
+    <View style={styles.cardContainer}>
       <FlatList
         data={chores}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Text>
-            {item.name} {item.description} {item.energyLevel}
-          </Text>
-        )}
+        renderItem={choreCard}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    marginTop: 10,
+  },
+  card: {
+    marginHorizontal: 10,
+    marginVertical: 5,
+  },
+  userIcons: {
+    paddingRight: 20,
+  },
+});
