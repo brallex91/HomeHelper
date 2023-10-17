@@ -28,7 +28,7 @@ export default function HouseholdScreen(props: HomeScreenProps) {
           <StatisticComponent />
         </View>
       </PagerView>
-      <Logout/>
+      <Logout />
     </View>
   );
 }
