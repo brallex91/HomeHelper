@@ -7,11 +7,16 @@ import { Text, useTheme } from "react-native-paper";
 import PagerView from "react-native-pager-view";
 import HouseholdScreen from "../screens/HouseholdScreen";
 import LoginScreen from "../screens/LoginScreen";
+import WelcomeScreen from "../screens/WelcomeScreen";
+import RegisterScreen from "../screens/RegisterScreen";
 
 export type RootStackParamList = {
+  Welcome: undefined;
   Login: undefined;
+  Register: undefined;
   Hushållet: undefined;
 };
+
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,7 +39,9 @@ export default function RootNavigator() {
 
   return (
     <RootStack.Navigator>
+      <RootStack.Screen name="Welcome" component={WelcomeScreen} />
       <RootStack.Screen name="Login" component={LoginScreen} />
+      <RootStack.Screen name="Register" component={RegisterScreen} />
 
       {/*Start of HouseHold-Screen*/}
       <RootStack.Screen

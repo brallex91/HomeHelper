@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "80%",
     justifyContent:"center",
-    gap:20
+    gap:20,
   },
 
   checkboxContainer: {
