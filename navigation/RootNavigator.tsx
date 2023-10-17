@@ -7,8 +7,8 @@ import { Text, useTheme } from "react-native-paper";
 import PagerView from "react-native-pager-view";
 import HouseholdScreen from "../screens/HouseholdScreen";
 import LoginScreen from "../screens/LoginScreen";
-import WelcomeScreen from "../screens/WelcomeScreen";
 import RegisterScreen from "../screens/RegisterScreen";
+import WelcomeScreen from "../screens/WelcomeScreen";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -17,12 +17,11 @@ export type RootStackParamList = {
   Hushållet: undefined;
 };
 
-
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   const [currentPage, setCurrentPage] = useState(0);
-  const pageNames = ["Home", "Statistics"];
+  const pageNames = ["Idag", "Förra Veckan"];
   const pagerRef = useRef<PagerView | null>(null);
   const theme = useTheme();
 
