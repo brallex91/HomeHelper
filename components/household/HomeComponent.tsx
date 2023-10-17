@@ -1,29 +1,33 @@
 import { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
 import { Text } from "react-native-paper";
-import { getUsers } from "../../api/user";
+import { getChores } from "../../api/chores";
 
 export default function HomeComponent() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [chores, setChores] = useState<Chore[]>([]);
 
   useEffect(() => {
-    async function fetchUsers() {
-      const usersData = await getUsers();
-      setUsers(usersData);
+    async function fetchChores() {
+      try {
+        const choresData = await getChores();
+        setChores(choresData);
+      } catch (error) {
+        console.error("Error fetching chores:", error);
+      }
     }
 
-    fetchUsers();
+    fetchChores();
   }, []);
 
   return (
     <View>
       <Text>Home Component</Text>
       <FlatList
-        data={users}
+        data={chores}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Text>
-            {item.name} {item.email}
+            {item.name} {item.description} {item.energyLevel}
           </Text>
         )}
       />
