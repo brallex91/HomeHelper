@@ -2,7 +2,6 @@
 
 # dependencies
 node_modules/
-firebaseConfig.tsx
 firebaseConfig.ts
 # Expo
 .env
