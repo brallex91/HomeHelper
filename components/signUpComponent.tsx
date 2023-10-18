@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { TextInput, Button, } from "react-native-paper";
+import { TextInput, Button } from "react-native-paper";
 import { auth, database } from "../database/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { ref, set } from "firebase/database";
@@ -14,18 +14,18 @@ const Register = () => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password
-        );
-        const user = userCredential.user;
-        
-        // Create a new user record in the Realtime Database
-        await set(ref(database, "users/" + user.uid), {
-          id: user.uid,
-          name: "",
-          email: email,
-          avatar: "",
-        });
-        
+        password,
+      );
+      const user = userCredential.user;
+
+      // Create a new user record in the Realtime Database
+      await set(ref(database, "users/" + user.uid), {
+        id: user.uid,
+        name: "",
+        email: email,
+        avatar: "",
+      });
+
       console.log("User registered:", user.email);
     } catch (error: any) {
       console.error("Registration error:", error.message);
@@ -49,7 +49,6 @@ const Register = () => {
       >
         Lägg till
       </Button>
-      
     </View>
   );
 };

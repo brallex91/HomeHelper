@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Button,} from "react-native-paper";
+import { Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 
 export default function WelcomeScreen() {

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Chore {
   description: string;
@@ -17,7 +17,7 @@ const initialState: ChoresState = {
 };
 
 export const choresSlice = createSlice({
-  name: 'chores',
+  name: "chores",
   initialState,
   reducers: {
     addChore: (state, action: PayloadAction<Chore>) => {
