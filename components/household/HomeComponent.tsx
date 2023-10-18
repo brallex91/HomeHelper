@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
-import { Card, Text } from "react-native-paper";
+import { Button, Card, Text } from "react-native-paper";
 import { getChores } from "../../api/chores";
+import { useNavigation } from "@react-navigation/native"; 
 
 export default function HomeComponent() {
   const [chores, setChores] = useState<Chore[]>([]);
+  const navigation = useNavigation(); 
+
+  const navigateToAddNewChore = () => {
+    navigation.navigate('AddNewChore');
+  };
 
   useEffect(() => {
     async function fetchChores() {
@@ -35,15 +41,18 @@ export default function HomeComponent() {
         keyExtractor={(item) => item.id}
         renderItem={choreCard}
       />
+      <Button onPress={navigateToAddNewChore}>Lägg till en ny chore</Button>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   cardContainer: {
+    
     marginTop: 10,
   },
   card: {
+    
     marginHorizontal: 10,
     marginVertical: 5,
   },
