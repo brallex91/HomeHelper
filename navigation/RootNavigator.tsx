@@ -10,6 +10,8 @@ import HouseholdScreen from '../screens/HouseholdScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
+import AddChoreScreen from "../screens/AddChoreScreen";
+
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -17,13 +19,14 @@ export type RootStackParamList = {
   Register: undefined;
   Hushållet: undefined;
   HouseholdOverview: undefined;
+  AddNewChore: undefined
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   const [currentPage, setCurrentPage] = useState(0);
-  const pageNames = ['Home', 'Statistics'];
+  const pageNames = ["Idag", "Förra Veckan"];
   const pagerRef = useRef<PagerView | null>(null);
   const theme = useTheme();
 
@@ -38,6 +41,7 @@ export default function RootNavigator() {
     setCurrentPage(event.nativeEvent.position);
   };
 
+  
   return (
     <RootStack.Navigator screenOptions={{ headerTitleAlign: 'center' }}>
       <RootStack.Screen
@@ -47,9 +51,11 @@ export default function RootNavigator() {
         name='HouseholdOverview'
         component={HouseholdOverviewScreen}
       />
-      <RootStack.Screen name='Welcome' component={WelcomeScreen} />
-      <RootStack.Screen name='Login' component={LoginScreen} />
-      <RootStack.Screen name='Register' component={RegisterScreen} />
+      <RootStack.Screen name="Welcome" component={WelcomeScreen} />
+      <RootStack.Screen name="Login" component={LoginScreen} />
+      <RootStack.Screen name="Register" component={RegisterScreen} />
+      <RootStack.Screen name="AddNewChore" component={AddChoreScreen} />
+
 
       {/*Start of HouseHold-Screen*/}
       <RootStack.Screen
