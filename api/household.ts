@@ -13,7 +13,7 @@ export async function updateApiUser(household: Household) {
 }
 
 export async function getHouseholds(): Promise<Household[]> {
-  const querySnapshot = await getDocs(collection(database, 'households'));
+  const querySnapshot = await getDocs(collection(database, "households"));
   const households = querySnapshot.docs.map((doc) => doc.data() as Household);
   return households;
 }

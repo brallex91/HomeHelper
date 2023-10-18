@@ -1,5 +1,5 @@
 import CreateHousehold from "../components/houseHoldGenComponent";
 
-export default function AddNewHousehold(){
-    return <CreateHousehold/>;
+export default function AddNewHousehold() {
+  return <CreateHousehold />;
 }

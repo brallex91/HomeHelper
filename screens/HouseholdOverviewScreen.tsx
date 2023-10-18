@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
-import { getHouseholds } from '../api/household';
-import { auth } from '../database/firebaseConfig';
+import { useEffect, useState } from "react";
+import { FlatList, Text, View } from "react-native";
+import { getHouseholds } from "../api/household";
+import { auth } from "../database/firebaseConfig";
 
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);

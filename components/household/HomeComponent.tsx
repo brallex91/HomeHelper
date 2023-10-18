@@ -25,7 +25,7 @@ export default function HomeComponent() {
       }
 
       fetchChores();
-    }, [])
+    }, []),
   );
 
   const BottomButtonBar = () => (
