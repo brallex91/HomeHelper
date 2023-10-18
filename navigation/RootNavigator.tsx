@@ -9,12 +9,15 @@ import HouseholdScreen from "../screens/HouseholdScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
+import AddChoreScreen from "../screens/AddChoreScreen";
+
 
 export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   Register: undefined;
   Hushållet: undefined;
+  AddNewChore: undefined
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -36,11 +39,13 @@ export default function RootNavigator() {
     setCurrentPage(event.nativeEvent.position);
   };
 
+  
   return (
     <RootStack.Navigator>
       <RootStack.Screen name="Welcome" component={WelcomeScreen} />
       <RootStack.Screen name="Login" component={LoginScreen} />
       <RootStack.Screen name="Register" component={RegisterScreen} />
+      <RootStack.Screen name="AddNewChore" component={AddChoreScreen} />
 
       {/*Start of HouseHold-Screen*/}
       <RootStack.Screen
