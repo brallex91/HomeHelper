@@ -3,7 +3,6 @@ import { StyleSheet, View } from "react-native";
 import PagerView from "react-native-pager-view";
 import HomeComponent from "../components/household/HomeComponent";
 import StatisticComponent from "../components/household/StatisticComponent";
-import Logout from "../components/signoutComponent";
 
 interface HomeScreenProps {
   pagerRef: React.RefObject<any>;
@@ -28,7 +27,6 @@ export default function HouseholdScreen(props: HomeScreenProps) {
           <StatisticComponent />
         </View>
       </PagerView>
-      <Logout />
     </View>
   );
 }
