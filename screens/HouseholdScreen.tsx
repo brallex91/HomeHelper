@@ -4,6 +4,7 @@ import PagerView from "react-native-pager-view";
 import HomeComponent from "../components/household/HomeComponent";
 import StatisticComponent from "../components/household/StatisticComponent";
 import Logout from "../components/signoutComponent";
+import CreateHousehold from "../components/houseHoldGenComponent";
 
 interface HomeScreenProps {
   pagerRef: React.RefObject<any>;
