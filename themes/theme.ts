@@ -7,7 +7,7 @@ export const AppLightTheme = {
   colors: {
     ...MD2LightTheme.colors,
     ...DefaultTheme.colors,
-    primary: "rgb(255, 45, 85)",
+    primary: "rgb(255,255,255)",
     background: "rgb(242, 242, 242)",
   },
 };
