@@ -1,8 +1,8 @@
-import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Card, useTheme } from 'react-native-paper';
-import { getHouseholds } from '../api/household';
+import { useNavigation } from "@react-navigation/native";
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Button, Card, useTheme } from "react-native-paper";
+import { getHouseholds } from "../api/household";
 
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);
@@ -20,14 +20,14 @@ export default function HouseholdOverviewScreen() {
   }, []);
 
   const navigateAddNewHousehold = () => {
-    navigation.navigate('AddNewHousehold');
+    navigation.navigate("AddNewHousehold");
   };
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
       <Button
-        icon='plus-circle-outline'
-        mode='contained'
+        icon="plus-circle-outline"
+        mode="contained"
         buttonColor={theme.colors.primary}
         onPress={navigateAddNewHousehold}
         style={styles.button}
@@ -37,8 +37,8 @@ export default function HouseholdOverviewScreen() {
         Lägg till nytt hushåll
       </Button>
       <Button
-        icon='plus-circle-outline'
-        mode='contained'
+        icon="plus-circle-outline"
+        mode="contained"
         buttonColor={theme.colors.primary}
         onPress={navigateAddNewHousehold}
         style={styles.button}
@@ -76,13 +76,13 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   buttonBar: {
-    flexDirection: 'column',
-    justifyContent: 'space-evenly',
+    flexDirection: "column",
+    justifyContent: "space-evenly",
     marginBottom: 40,
   },
   button: {
     marginHorizontal: 4,
-    borderColor: 'rgb(242, 242, 242)',
+    borderColor: "rgb(242, 242, 242)",
     borderWidth: 1,
     borderRadius: 20,
   },
