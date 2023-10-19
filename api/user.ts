@@ -3,7 +3,9 @@ import { database } from "../database/firebaseConfig";
 
 export async function getUsers(): Promise<User[]> {
   const querySnapshot = await getDocs(collection(database, "users"));
-  const users = querySnapshot.docs.map((doc) => doc.data() as User);
+  const users = querySnapshot.docs.map(
+    (doc) => ({ id: doc.id, ...doc.data() }) as User
+  );
   return users;
 }
 

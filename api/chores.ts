@@ -3,7 +3,9 @@ import { database } from "../database/firebaseConfig";
 
 export async function getChores(): Promise<Chore[]> {
   const querySnapshot = await getDocs(collection(database, "chores"));
-  const chores = querySnapshot.docs.map((doc) => doc.data() as Chore);
+  const chores = querySnapshot.docs.map(
+    (doc) => ({ id: doc.id, ...doc.data() }) as Chore
+  );
   return chores;
 }
 
