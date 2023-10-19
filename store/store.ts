@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import choresReducer from "../chore/choreSlice";
-import householdReducer from "../householdSlice/houseHoldSlice";
+import householdReducer from "./houseHoldSlice";
 
 export const store = configureStore({
   reducer: {
