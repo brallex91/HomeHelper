@@ -1,24 +1,57 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import { Entypo } from "@expo/vector-icons";
+import React, { useRef, useState } from "react";
+import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native";
 import PagerView from "react-native-pager-view";
-import HomeComponent from "../components/household/HomeComponent";
+import { Text, useTheme } from "react-native-paper";
+import HomeComponent from "../components/household/HouseholdListComponent";
 import StatisticComponent from "../components/household/StatisticComponent";
 
-interface HomeScreenProps {
-  pagerRef: React.RefObject<any>;
-  handlePageSelected: (event: { nativeEvent: { position: number } }) => void;
-  currentPage: number;
-  pageNames: string[];
-}
+export default function HouseholdChoreScreen() {
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageNames = ["Idag", "Förra Veckan"];
+  const pagerRef = useRef<PagerView | null>(null);
+  const theme = useTheme();
 
-export default function HouseholdScreen(props: HomeScreenProps) {
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < pageNames.length) {
+      setCurrentPage(newPage);
+      pagerRef.current?.setPage(newPage);
+    }
+  };
+
+  const handlePageSelected = (event: { nativeEvent: { position: number } }) => {
+    setCurrentPage(event.nativeEvent.position);
+  };
+
   return (
     <View style={{ flex: 1 }}>
+      <SafeAreaView
+        style={{
+          backgroundColor: theme.colors.background,
+          marginTop: 24,
+        }}
+      >
+        <Text style={styles.screenName}>Hushållet</Text>
+        <View style={styles.navBar}>
+          <TouchableOpacity onPress={() => handlePageChange(currentPage - 1)}>
+            <Text style={styles.navText}>
+              <Entypo name="chevron-thin-left" size={24} />
+            </Text>
+          </TouchableOpacity>
+          <Text style={{ ...styles.navText }}>{pageNames[currentPage]}</Text>
+          <TouchableOpacity onPress={() => handlePageChange(currentPage + 1)}>
+            <Text style={styles.navText}>
+              <Entypo name="chevron-thin-right" size={24} />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+
       <PagerView
         style={styles.pagerView}
-        initialPage={props.currentPage}
-        ref={props.pagerRef}
-        onPageSelected={props.handlePageSelected}
+        initialPage={currentPage}
+        ref={pagerRef}
+        onPageSelected={handlePageSelected}
       >
         <View key="1">
           <HomeComponent />
@@ -32,6 +65,20 @@ export default function HouseholdScreen(props: HomeScreenProps) {
 }
 
 const styles = StyleSheet.create({
+  screenName: {
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  navBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  navText: {
+    fontSize: 15,
+  },
   pagerView: {
     flex: 1,
   },
