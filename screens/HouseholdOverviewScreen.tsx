@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Card, useTheme } from 'react-native-paper';
 import { getHouseholds } from '../api/household';
 
 export default function HouseholdOverviewScreen() {
@@ -34,19 +34,31 @@ export default function HouseholdOverviewScreen() {
         labelStyle={styles.buttonLabel}
         contentStyle={styles.buttonContent}
       >
-        Lägg Till Nytt Hushåll
+        Lägg till nytt hushåll
+      </Button>
+      <Button
+        icon='plus-circle-outline'
+        mode='contained'
+        buttonColor={theme.colors.primary}
+        onPress={navigateAddNewHousehold}
+        style={styles.button}
+        labelStyle={styles.buttonLabel}
+        contentStyle={styles.buttonContent}
+      >
+        Gå med i ett hushåll
       </Button>
     </View>
   );
 
   return (
     <View>
-      <Text>Hushåll översikt</Text>
-      <FlatList
-        data={households}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <Text>{item.name}</Text>}
-      />
+      <ScrollView contentContainerStyle={styles.cardContainer}>
+        {households.map((household) => (
+          <Card key={household.id} style={styles.card}>
+            <Card.Title title={household.name} />
+          </Card>
+        ))}
+      </ScrollView>
       <BottomButtonBar />
     </View>
   );
@@ -64,7 +76,7 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   buttonBar: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-evenly',
     marginBottom: 40,
   },
