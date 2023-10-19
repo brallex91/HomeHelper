@@ -1,9 +1,3 @@
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-}
 interface Profile {
   id: string;
   name: string;
@@ -14,8 +8,8 @@ interface Household {
   id: string;
   name: string;
   key: string; // En genererad kod för att gå med i hushållet
-  members: Profile[]; // Användare som är medlemmar i hushållet, där sparas användarens ID, name och avatar.
-  chores: Chore[];
+  members: string[] //Profile ID sparas här
+  chores: string[] //Chore ID sparas här
   ownerID: string; // ID för användaren som skapade hushållet
 }
 
