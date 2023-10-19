@@ -44,6 +44,9 @@ export default function RootNavigator() {
 
   return (
     <RootStack.Navigator screenOptions={{ headerTitleAlign: 'center' }}>
+      <RootStack.Screen name='Welcome' component={WelcomeScreen} />
+      <RootStack.Screen name='Login' component={LoginScreen} />
+      <RootStack.Screen name='Register' component={RegisterScreen} />
       <RootStack.Screen
         options={{
           title: 'Välkommen!',
@@ -51,9 +54,6 @@ export default function RootNavigator() {
         name='HouseholdOverview'
         component={HouseholdOverviewScreen}
       />
-      <RootStack.Screen name='Welcome' component={WelcomeScreen} />
-      <RootStack.Screen name='Login' component={LoginScreen} />
-      <RootStack.Screen name='Register' component={RegisterScreen} />
       <RootStack.Screen name='AddNewChore' component={AddChoreScreen} />
       <RootStack.Screen name='AddNewHousehold' component={AddNewHousehold} />
 

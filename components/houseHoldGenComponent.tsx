@@ -3,7 +3,7 @@ import { View, TextInput, Button } from "react-native";
 import { auth, database } from "../database/firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 import { useDispatch } from "react-redux";
-import { addHousehold } from "../householdSlice/houseHoldSlice";
+import { addHousehold } from "../store/houseHoldSlice";
 
 const CreateHousehold = () => {
   const dispatch = useDispatch();

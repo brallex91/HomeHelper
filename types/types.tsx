@@ -30,6 +30,7 @@ interface Chore {
 }
 
 interface ChoreCompletion {
+  householdId: string;
   choreId: string;
   profileId: string;
   date: Date; // Datum och tid när sysslan slutfördes
