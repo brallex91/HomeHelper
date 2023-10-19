@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TextInput, Button } from "react-native-paper";
 import { useDispatch } from "react-redux";
-import { addChore } from "../chore/choreSlice";
+import { addChore } from "../store/choreSlice";
 import { View } from "react-native";
 import { database } from "../database/firebaseConfig";
 import { addDoc, collection } from "firebase/firestore"; // vet inte varför den inte finns. Men den funkar (addDoc)

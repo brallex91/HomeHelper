@@ -3,14 +3,22 @@ import * as React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Button, Card, Text, useTheme } from "react-native-paper";
 import { getChores } from "../../api/chores";
+import { useDispatch } from 'react-redux';
+import { setChoreDetails } from "../../store/choreDetailsSlice";
 
 export default function HomeComponent() {
+  const dispatch = useDispatch();
   const [chores, setChores] = React.useState<Chore[]>([]);
   const navigation = useNavigation();
   const theme = useTheme();
 
   const navigateToAddNewChore = () => {
     navigation.navigate("AddNewChore");
+  };
+
+  const navigateToChoreDetails = (chore: any) => {
+    dispatch(setChoreDetails(chore)); 
+    navigation.navigate("ChoreDetails");
   };
 
   useFocusEffect(
@@ -63,6 +71,7 @@ export default function HomeComponent() {
               title={chore.name}
               right={(props) => <Text style={styles.userIcons}>🐷</Text>}
             />
+            <Button mode="contained" onPress={() => navigateToChoreDetails(chore)}>Info</Button>
           </Card>
         ))}
       </ScrollView>
