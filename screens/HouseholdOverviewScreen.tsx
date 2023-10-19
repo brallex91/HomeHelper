@@ -1,12 +1,25 @@
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Button, Card, useTheme } from "react-native-paper";
 import { getHouseholds } from "../api/household";
 
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);
   const navigation = useNavigation();
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
 
   const theme = useTheme();
 
@@ -22,6 +35,29 @@ export default function HouseholdOverviewScreen() {
   const navigateAddNewHousehold = () => {
     navigation.navigate("AddNewHousehold");
   };
+
+  const modalContent = (
+    <View>
+      <TextInput
+        placeholder="Ange kod"
+        style={{
+          borderWidth: 1,
+          borderColor: "gray",
+          width: 200,
+          padding: 10,
+          marginBottom: 10,
+          fontSize: 25,
+          textAlign: "center",
+        }}
+      />
+      <Button
+        style={{ backgroundColor: "green", zIndex: 2 }}
+        onPress={toggleModal}
+      >
+        Gå med i hushåll
+      </Button>
+    </View>
+  );
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
@@ -40,12 +76,15 @@ export default function HouseholdOverviewScreen() {
         icon="plus-circle-outline"
         mode="contained"
         buttonColor={theme.colors.primary}
-        onPress={navigateAddNewHousehold}
+        onPress={toggleModal}
         style={styles.button}
         labelStyle={styles.buttonLabel}
         contentStyle={styles.buttonContent}
       >
         Gå med i ett hushåll
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        ></View>
       </Button>
     </View>
   );
@@ -59,6 +98,16 @@ export default function HouseholdOverviewScreen() {
           </Card>
         ))}
       </ScrollView>
+      {isModalVisible && (
+        <Modal animationType="slide" visible={isModalVisible}>
+          <View style={styles.modalBackground}>
+            <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+            <View style={styles.modalContent}>{modalContent}</View>
+          </View>
+        </Modal>
+      )}
       <BottomButtonBar />
     </View>
   );
@@ -91,5 +140,24 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     padding: 8,
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    zIndex: 3,
+  },
+  closeButtonText: {
+    fontSize: 24,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
