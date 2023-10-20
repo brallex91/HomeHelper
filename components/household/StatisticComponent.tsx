@@ -1,132 +1,87 @@
-import React, { Component } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import PieChart from "react-native-pie-chart";
+import React from "react";
+import { Path, Svg, Text } from "react-native-svg";
 
-export default class TestChart extends Component {
-  render() {
-    const largeChartData = [123, 321, 123, 789, 537];
-    const sliceColor = ["#fbd203", "#ffb300", "#ff9100", "#ff6c00", "#ff3c00"];
+type StatisticComponentProps = {
+  data: DataItem[];
+  chartSize: number;
+  emojiSize: number;
+};
 
-    const smallChartsData = [
-      {
-        series: [50, 50],
-        sliceColor: ["#fbd203", "#ffb300"],
-        description: "Chore",
-      },
-      {
-        series: [75, 25],
-        sliceColor: ["#ff9100", "#ff6c00"],
-        description: "Chore",
-      },
-      {
-        series: [60, 40],
-        sliceColor: ["#ff3c00", "#ffb300"],
-        description: "Chore",
-      },
-      {
-        series: [50, 50],
-        sliceColor: ["#fbd203", "#ffb300"],
-        description: "Chore",
-      },
-      {
-        series: [75, 25],
-        sliceColor: ["#ff9100", "#ff6c00"],
-        description: "Chore",
-      },
-      {
-        series: [60, 40],
-        sliceColor: ["#ff3c00", "#ffb300"],
-        description: "Chore",
-      },
-    ];
+type DataItem = {
+  number: number;
+  emoji: string;
+  color: string;
+};
 
-    const smallChartRows = [];
-    for (let i = 0; i < smallChartsData.length; i += 3) {
-      smallChartRows.push(smallChartsData.slice(i, i + 3));
-    }
+const StatisticComponent: React.FC<StatisticComponentProps> = ({
+  data,
+  chartSize,
+  emojiSize,
+}) => {
+  const total = data.reduce((sum, item) => sum + item.number, 0);
+  let currentAngle = -Math.PI / 2;
+
+  const PieChartSlice: React.FC<{
+    center: number;
+    radius: number;
+    startAngle: number;
+    endAngle: number;
+    color: string;
+    emoji: string;
+  }> = ({ center, radius, startAngle, endAngle, color, emoji }) => {
+    const x1 = center + radius * Math.cos(startAngle);
+    const y1 = center + radius * Math.sin(startAngle);
+    const x2 = center + radius * Math.cos(endAngle);
+    const y2 = center + radius * Math.sin(endAngle);
+    const largeArcFlag = endAngle - startAngle <= Math.PI ? 0 : 1;
+
+    const pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} L ${center} ${center} Z`;
+
+    const textX =
+      center +
+      (radius / 2) * Math.cos(startAngle + (endAngle - startAngle) / 2);
+    const textY =
+      center +
+      (radius / 2) * Math.sin(startAngle + (endAngle - startAngle) / 2);
 
     return (
-      <View style={styles.container}>
-        <View style={styles.largeChartContainer}>
-          <View style={styles.chartWithIcon}>
-            <PieChart
-              widthAndHeight={200}
-              series={largeChartData}
-              sliceColor={sliceColor}
-            />
-          </View>
-          <Text style={styles.chartText}>Totalt</Text>
-        </View>
-
-        <ScrollView
-          contentContainerStyle={styles.smallChartsContainer}
-          showsVerticalScrollIndicator={false}
+      <>
+        <Path d={pathData} fill={color} />
+        <Text
+          x={textX}
+          y={textY}
+          textAnchor="middle"
+          alignmentBaseline="middle"
+          fontSize={emojiSize}
         >
-          {smallChartRows.map((row, rowIndex) => (
-            <View key={rowIndex} style={styles.smallChartRow}>
-              {row.map((item, index) => (
-                <View
-                  key={index}
-                  style={{
-                    ...styles.smallChart,
-                    width: 100,
-                    height: 200,
-                  }}
-                >
-                  <View style={styles.chartWithIcon}>
-                    <PieChart
-                      widthAndHeight={100}
-                      series={item.series}
-                      sliceColor={item.sliceColor}
-                    />
-                    <Text style={styles.emoji}>🐷</Text>
-                  </View>
-                  <Text style={styles.chartText}>{item.description}</Text>
-                </View>
-              ))}
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+          {emoji}
+        </Text>
+      </>
     );
-  }
-}
+  };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    paddingBottom: 50,
-  },
-  largeChartContainer: {
-    alignItems: "center",
-    marginTop: 30,
-    marginBottom: 20,
-  },
-  smallChartsContainer: {
-    alignItems: "center",
-  },
-  smallChartRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: -60,
-  },
-  smallChart: {
-    margin: 5,
-  },
-  chartWithIcon: {
-    alignItems: "center",
-    position: "relative",
-  },
-  chartText: {
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 5,
-  },
-  emoji: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-  },
-});
+  return (
+    <Svg width={chartSize} height={chartSize}>
+      {data.map((item, index) => {
+        const { number, emoji, color } = item;
+        const angle = currentAngle;
+        const endAngle = currentAngle + 2 * Math.PI * (number / total);
+        currentAngle = endAngle;
+
+        return (
+          <PieChartSlice
+            key={index}
+            center={chartSize / 2}
+            radius={chartSize / 2}
+            startAngle={angle}
+            endAngle={endAngle}
+            color={color}
+            emoji={emoji}
+          />
+        );
+      })}
+    </Svg>
+  );
+};
+
+export default StatisticComponent;
