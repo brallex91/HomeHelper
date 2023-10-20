@@ -2,12 +2,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import AddChoreScreen from "../screens/AddChoreScreen";
 import AddNewHousehold from "../screens/AddHouseholdScreen";
+import ChoreDetailsScreen from "../screens/ChoreDetailsScreen";
+import CreateProfile from "../screens/CreateProfileScreen";
 import HouseholdChoreScreen from "../screens/HouseholdChoreScreen";
 import HouseholdOverviewScreen from "../screens/HouseholdOverviewScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
-import ChoreDetailsScreen from "../screens/ChoreDetailsScreen";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -18,6 +19,7 @@ export type RootStackParamList = {
   AddNewChore: undefined;
   AddNewHousehold: undefined;
   ChoreDetails: undefined;
+  CreateProfile: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -25,6 +27,13 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <RootStack.Navigator>
+      <RootStack.Screen
+        name="CreateProfile"
+        component={CreateProfile}
+        options={{
+          headerTitleAlign: "center",
+        }}
+      />
       <RootStack.Screen
         name="HouseholdChores"
         component={HouseholdChoreScreen}
