@@ -2,11 +2,11 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Button, Card, Text, useTheme } from "react-native-paper";
+import { useDispatch } from "react-redux";
 import { getChores } from "../../api/chores";
-import { useDispatch } from 'react-redux';
 import { setChoreDetails } from "../../store/choreDetailsSlice";
 
-export default function HomeComponent() {
+export default function HouseholdListComponent() {
   const dispatch = useDispatch();
   const [chores, setChores] = React.useState<Chore[]>([]);
   const navigation = useNavigation();
@@ -17,7 +17,7 @@ export default function HomeComponent() {
   };
 
   const navigateToChoreDetails = (chore: any) => {
-    dispatch(setChoreDetails(chore)); 
+    dispatch(setChoreDetails(chore));
     navigation.navigate("ChoreDetails");
   };
 
@@ -33,7 +33,7 @@ export default function HomeComponent() {
       }
 
       fetchChores();
-    }, []),
+    }, [])
   );
 
   const BottomButtonBar = () => (
@@ -71,7 +71,12 @@ export default function HomeComponent() {
               title={chore.name}
               right={(props) => <Text style={styles.userIcons}>🐷</Text>}
             />
-            <Button mode="contained" onPress={() => navigateToChoreDetails(chore)}>Info</Button>
+            <Button
+              mode="contained"
+              onPress={() => navigateToChoreDetails(chore)}
+            >
+              Info
+            </Button>
           </Card>
         ))}
       </ScrollView>
