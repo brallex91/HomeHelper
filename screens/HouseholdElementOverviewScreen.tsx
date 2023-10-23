@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { getProfiles } from '../api/profiles';  // Import the getProfiles function
+import { getProfiles } from '../api/profiles'; 
 
 type RootStackParamList = {
   HouseholdElementOverviewScreen: { household: Household };

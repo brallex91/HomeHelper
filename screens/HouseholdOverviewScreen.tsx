@@ -60,7 +60,7 @@ export default function HouseholdOverviewScreen() {
           <Card 
             key={household.id} 
             style={styles.card}
-            onPress={() => navigateToHouseholdElementOverview(household)}  // Add onPress here
+            onPress={() => navigateToHouseholdElementOverview(household)}  
           >
             <Card.Title title={household.name} />
           </Card>
