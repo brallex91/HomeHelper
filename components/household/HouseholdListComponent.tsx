@@ -1,10 +1,16 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { Button, Card, Text, useTheme } from "react-native-paper";
 import { useDispatch } from "react-redux";
 import { getChores } from "../../api/chores";
 import { setChoreDetails } from "../../store/choreDetailsSlice";
+import { Chore } from "../../store/choreSlice";
 
 export default function HouseholdListComponent() {
   const dispatch = useDispatch();
@@ -66,20 +72,20 @@ export default function HouseholdListComponent() {
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {chores.map((chore) => (
-          <Card key={chore.id} style={styles.card}>
-            <Card.Title
-              title={chore.name}
-              right={(props) => <Text style={styles.userIcons}>🐷</Text>}
-            />
-            <Button
-              mode="contained"
-              onPress={() => navigateToChoreDetails(chore)}
-            >
-              Info
-            </Button>
-          </Card>
+          <TouchableWithoutFeedback
+            key={chore.id}
+            onPress={() => navigateToChoreDetails(chore)}
+          >
+            <Card style={styles.card}>
+              <Card.Title
+                title={chore.name}
+                right={(props) => <Text style={styles.userIcons}>🐷</Text>}
+              />
+            </Card>
+          </TouchableWithoutFeedback>
         ))}
       </ScrollView>
+
       <BottomButtonBar />
     </View>
   );
