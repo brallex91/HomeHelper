@@ -7,6 +7,9 @@ import { getHouseholds } from "../api/household";
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);
   const navigation = useNavigation();
+  const navigateToHouseholdElementOverview = (household: Household) => {
+    navigation.navigate("HouseholdElementOverviewScreen", { household });
+  };
 
   const theme = useTheme();
 
@@ -54,7 +57,11 @@ export default function HouseholdOverviewScreen() {
     <View>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {households.map((household) => (
-          <Card key={household.id} style={styles.card}>
+          <Card 
+            key={household.id} 
+            style={styles.card}
+            onPress={() => navigateToHouseholdElementOverview(household)}  // Add onPress here
+          >
             <Card.Title title={household.name} />
           </Card>
         ))}

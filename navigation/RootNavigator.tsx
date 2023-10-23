@@ -7,6 +7,7 @@ import HouseholdOverviewScreen from "../screens/HouseholdOverviewScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
+import HouseholdElementOverviewScreen from "../screens/HouseholdElementOverviewScreen";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -16,13 +17,14 @@ export type RootStackParamList = {
   HouseholdOverview: undefined;
   AddNewChore: undefined;
   AddNewHousehold: undefined;
+  HouseholdElementOverviewScreen: { household: Household };
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <RootStack.Navigator>
+    <RootStack.Navigator initialRouteName="HouseholdOverview">
       <RootStack.Screen
         name="HouseholdChores"
         component={HouseholdChoreScreen}
@@ -40,6 +42,13 @@ export default function RootNavigator() {
       <RootStack.Screen
         name="HouseholdOverview"
         component={HouseholdOverviewScreen}
+        options={{
+          headerTitleAlign: "center",
+        }}
+      />
+        <RootStack.Screen
+        name="HouseholdElementOverviewScreen"
+        component={HouseholdElementOverviewScreen}
         options={{
           headerTitleAlign: "center",
         }}
