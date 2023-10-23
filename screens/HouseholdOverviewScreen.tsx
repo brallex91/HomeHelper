@@ -1,5 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import {
   Modal,
   ScrollView,
@@ -8,15 +8,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
-import { Button, Card, useTheme } from "react-native-paper";
-import { getHouseholds } from "../api/household";
+} from 'react-native';
+import { Button, Card, useTheme } from 'react-native-paper';
+import { getHouseholdByCode, getHouseholds } from '../api/household';
 
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);
+  const [householdCode, setHouseholdCode] = useState('');
+  const [error, setError] = useState('');
+  const [isJoiningHousehold, setIsJoiningHousehold] = useState(false);
   const navigation = useNavigation();
   const navigateToHouseholdElementOverview = (household: Household) => {
-    navigation.navigate("HouseholdElementOverviewScreen", { household });
+    navigation.navigate('HouseholdElementOverviewScreen', { household });
   };
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -36,26 +39,57 @@ export default function HouseholdOverviewScreen() {
   }, []);
 
   const navigateAddNewHousehold = () => {
-    navigation.navigate("AddNewHousehold");
+    navigation.navigate('AddNewHousehold');
   };
+
+  // --- START OF CHECKHOUSEHOLDCODE --- //
+  const joinHousehold = async () => {
+    setError('');
+
+    try {
+      setIsJoiningHousehold(true);
+
+      const household = await getHouseholdByCode(householdCode);
+
+      if (household) {
+        console.log('Hushåll hittat!!!');
+        navigation.navigate('CreateProfileScreen', { householdCode });
+      } else {
+        setError('Hushåll ej hittat');
+      }
+    } catch (error) {
+      console.error('Något gick fel: ', error);
+    } finally {
+      setIsJoiningHousehold(false);
+    }
+  };
+  // --- END OF CHECKHOUSEHOLDCODE --- //
 
   const modalContent = (
     <View>
       <TextInput
-        placeholder="Ange kod"
+        placeholder='Ange kod'
         style={{
           borderWidth: 1,
-          borderColor: "gray",
+          borderColor: 'gray',
           width: 200,
           padding: 10,
           marginBottom: 10,
           fontSize: 25,
-          textAlign: "center",
+          textAlign: 'left',
+          paddingLeft: 45,
+        }}
+        value={householdCode}
+        onChangeText={(text) => {
+          setHouseholdCode(text);
+          setError('');
         }}
       />
+      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
       <Button
-        style={{ backgroundColor: "green", zIndex: 2 }}
-        onPress={toggleModal}
+        style={{ backgroundColor: 'green', zIndex: 2 }}
+        onPress={joinHousehold}
+        disabled={isJoiningHousehold}
       >
         Gå med i hushåll
       </Button>
@@ -65,8 +99,8 @@ export default function HouseholdOverviewScreen() {
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
       <Button
-        icon="plus-circle-outline"
-        mode="contained"
+        icon='plus-circle-outline'
+        mode='contained'
         buttonColor={theme.colors.primary}
         onPress={navigateAddNewHousehold}
         style={styles.button}
@@ -76,8 +110,8 @@ export default function HouseholdOverviewScreen() {
         Lägg till nytt hushåll
       </Button>
       <Button
-        icon="plus-circle-outline"
-        mode="contained"
+        icon='plus-circle-outline'
+        mode='contained'
         buttonColor={theme.colors.primary}
         onPress={toggleModal}
         style={styles.button}
@@ -86,7 +120,7 @@ export default function HouseholdOverviewScreen() {
       >
         Gå med i ett hushåll
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         ></View>
       </Button>
     </View>
@@ -96,17 +130,17 @@ export default function HouseholdOverviewScreen() {
     <View>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {households.map((household) => (
-          <Card 
-            key={household.id} 
+          <Card
+            key={household.id}
             style={styles.card}
-            onPress={() => navigateToHouseholdElementOverview(household)}  
+            onPress={() => navigateToHouseholdElementOverview(household)}
           >
             <Card.Title title={household.name} />
           </Card>
         ))}
       </ScrollView>
       {isModalVisible && (
-        <Modal animationType="slide" visible={isModalVisible}>
+        <Modal animationType='slide' visible={isModalVisible}>
           <View style={styles.modalBackground}>
             <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
               <Text style={styles.closeButtonText}>X</Text>
@@ -132,13 +166,13 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   buttonBar: {
-    flexDirection: "column",
-    justifyContent: "space-evenly",
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
     marginBottom: 40,
   },
   button: {
     marginHorizontal: 4,
-    borderColor: "rgb(242, 242, 242)",
+    borderColor: 'rgb(242, 242, 242)',
     borderWidth: 1,
     borderRadius: 20,
   },
@@ -150,11 +184,11 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 20,
     left: 20,
     zIndex: 3,
@@ -164,7 +198,7 @@ const styles = StyleSheet.create({
   },
   modalBackground: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
