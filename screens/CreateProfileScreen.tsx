@@ -2,45 +2,49 @@ import * as React from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 
-
-export default function CreateProfile () {
-    
+export default function CreateProfile() {
+    const emojis = ['🦊', '🐷', '🐸', '🐥', '🐙', '🐬', '🦉', '🦄'];
 
     return (
-        <View>
-            <Text>Textinput Profilnamn</Text>
-            <Text>text: välj avatar</Text>
-            <Text> gridlist för avatarbilder</Text>
+        <View style={{ alignItems: "center" }}>
+            <Text>Text: Välj avatar</Text>
+            <View style={styles.emojiContainer}>
+                {rowArray(emojis, 4).map((row, rowIndex) => (
+                    <View style={styles.emojiRow} key={rowIndex}>
+                        {row.map((emoji, index) => (
+                            <Text style={styles.emoji} key={index}>
+                                {emoji}
+                            </Text>
+                        ))}
+                    </View>
+                ))}
+            </View>
         </View>
     );
 }
 
+function rowArray(array: string[] , rowSize: number) {
+    const result = [];
+    for (let i = 0; i < array.length; i += rowSize) {
+        result.push(array.slice(i, i + rowSize));
+    }
+    return result;
+}
+
 const styles = StyleSheet.create({
-    cardContainer: {
-      marginTop: 10,
+    emojiContainer: {
+        alignItems: "center",
+        justifyContent: "center",
     },
-    card: {
-      marginHorizontal: 10,
-      marginVertical: 5,
+    emojiRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
     },
-    userIcons: {
-      paddingRight: 20,
+    emoji: {
+        fontSize: 45,
+        flex: 1,
+        maxWidth: "25%",
+        alignItems: "center",
     },
-    buttonBar: {
-      flexDirection: "row",
-      justifyContent: "space-evenly",
-      marginBottom: 40,
-    },
-    button: {
-      marginHorizontal: 4,
-      borderColor: "rgb(242, 242, 242)",
-      borderWidth: 1,
-      borderRadius: 20,
-    },
-    buttonLabel: {
-      fontSize: 18,
-    },
-    buttonContent: {
-      padding: 8,
-    },
-  });
+});
