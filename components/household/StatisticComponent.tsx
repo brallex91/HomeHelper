@@ -1,5 +1,5 @@
 import React from "react";
-import { Path, Svg, Text } from "react-native-svg";
+import { Circle, Path, Svg, Text } from "react-native-svg";
 
 type StatisticComponentProps = {
   data: DataItem[];
@@ -18,6 +18,31 @@ const StatisticComponent: React.FC<StatisticComponentProps> = ({
   chartSize,
   emojiSize,
 }) => {
+  // Om det bara finns 1 dataobjekt
+  if (data.length === 1) {
+    const singleData = data[0];
+    const emoji = singleData.emoji;
+    const color = singleData.color;
+
+    const center = chartSize / 2;
+
+    return (
+      <Svg width={chartSize} height={chartSize}>
+        <Circle cx={center} cy={center} r={center} fill={color} />
+        <Text
+          x={center}
+          y={center}
+          textAnchor="middle"
+          alignmentBaseline="middle"
+          fontSize={emojiSize}
+        >
+          {emoji}
+        </Text>
+      </Svg>
+    );
+  }
+
+  // // Om det finns fler än 1 dataobjekt
   const total = data.reduce((sum, item) => sum + item.number, 0);
   let currentAngle = -Math.PI / 2;
 

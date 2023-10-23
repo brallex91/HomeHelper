@@ -3,13 +3,13 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 import StatisticComponent from "./StatisticComponent";
 
-const emojis: string[] = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"];
-
 interface DataItem {
   number: number;
   emoji: string;
   color: string;
 }
+
+const emojis: string[] = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"];
 
 const getColorForEmoji = (emoji: string) => {
   switch (emoji) {
@@ -28,7 +28,7 @@ const getColorForEmoji = (emoji: string) => {
     case "🦉":
       return "#e1ae93";
     case "🦄":
-      return "#fff1f1";
+      return "#ce84ce";
     default:
       return "#FFFFFF";
   }
@@ -40,7 +40,7 @@ const generateRandomData = (maxCount: number, maxTotal: number): DataItem[] => {
   const remainingEmojis = [...emojis];
 
   while (data.length < maxCount) {
-    const minNumber = 20;
+    const minNumber = 15;
     const maxNumber = Math.min(maxTotal - total + 1, 100 - total + 1);
 
     if (maxNumber < minNumber) {
@@ -123,7 +123,6 @@ const styles = StyleSheet.create({
   },
   flexItem: {
     width: "30%",
-    backgroundColor: "#EFEFEF",
     padding: 10,
     borderRadius: 10,
     marginBottom: 10,
