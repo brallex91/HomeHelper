@@ -15,6 +15,9 @@ import { getHouseholds } from "../api/household";
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);
   const navigation = useNavigation();
+  const navigateToHouseholdElementOverview = (household: Household) => {
+    navigation.navigate("HouseholdElementOverviewScreen", { household });
+  };
 
   const [isModalVisible, setModalVisible] = useState(false);
   const toggleModal = () => {
@@ -93,7 +96,11 @@ export default function HouseholdOverviewScreen() {
     <View>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {households.map((household) => (
-          <Card key={household.id} style={styles.card}>
+          <Card 
+            key={household.id} 
+            style={styles.card}
+            onPress={() => navigateToHouseholdElementOverview(household)}  
+          >
             <Card.Title title={household.name} />
           </Card>
         ))}
