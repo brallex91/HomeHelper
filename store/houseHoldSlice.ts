@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Chore } from "./choreSlice";
 
 export interface Profile {
   id: string;
