@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native'; 
+import { View, FlatList, Text, StyleSheet, TouchableWithoutFeedback, TextInput } from 'react-native'; 
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { getProfiles } from '../api/profiles'; 
 import { Card, Button } from 'react-native-paper';
+import { auth } from '../database/firebaseConfig';
+import { updateApiHousehold } from '../api/household';
 
 type RootStackParamList = {
   HouseholdElementOverviewScreen: { household: Household };
@@ -14,17 +15,25 @@ export default function HouseholdElementOverviewScreen () {
   const route = useRoute<HouseholdElementOverviewScreenRouteProp>();
   const navigation = useNavigation();
   const { household } = route.params;
+  const userID = auth.currentUser?.uid;
 
   const [profiles, setProfiles] = React.useState<Profile[]>([]);
 
+  const [isOwner, setIsOwner] = React.useState(false);
+  const [newHouseholdName, setNewHouseholdName] = React.useState(household.name);
+
   React.useEffect(() => {
-    async function fetchProfiles() {
-      const profilesData = await getProfiles();
-      setProfiles(profilesData);
+    async function checkOwnership() {
+      setIsOwner(userID === household.ownerID);
     }
 
-    fetchProfiles();
-  }, []);
+    checkOwnership();
+  }, [household.ownerID]);
+
+  async function handleNameChange() {
+    household.name = newHouseholdName;
+    await updateApiHousehold(household);
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -46,12 +55,29 @@ export default function HouseholdElementOverviewScreen () {
                 title={profile?.name}
                 right={(props) => (
                   <Text style={styles.userIcons}>{profile?.avatar}</Text>
-                )}
-              />
+                  )}
+                  />
             </Card>
           );
         }}
-      />
+        />
+        {isOwner && (
+        <View style={{ padding: 16 }}>
+          <TextInput
+            value={newHouseholdName}
+            onChangeText={setNewHouseholdName}
+            placeholder="New Household Name"
+            style={{ borderColor: 'gray', borderWidth: 1, marginBottom: 8, padding: 8 }}
+          />
+          <Button 
+            mode="contained" 
+            onPress={handleNameChange}
+            style={styles.button}
+          >
+            Change Name
+          </Button>
+        </View>
+      )}
         <Button 
         mode="contained" 
         onPress={() => {
@@ -87,6 +113,7 @@ const styles = StyleSheet.create({
         borderColor: "rgb(242, 242, 242)",
         borderWidth: 1,
         borderRadius: 20,
+        marginBottom: 30,
     },
     buttonLabel: {
         fontSize: 18,
