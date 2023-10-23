@@ -3,8 +3,8 @@ import React, { useRef, useState } from "react";
 import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native";
 import PagerView from "react-native-pager-view";
 import { Text, useTheme } from "react-native-paper";
-import HomeComponent from "../components/household/HouseholdListComponent";
-import StatisticComponent from "../components/household/StatisticComponent";
+import HouseholdListComponent from "../components/household/HouseholdListComponent";
+import StatisticView from "../components/household/StatisticView";
 
 export default function HouseholdChoreScreen() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -54,10 +54,10 @@ export default function HouseholdChoreScreen() {
         onPageSelected={handlePageSelected}
       >
         <View key="1">
-          <HomeComponent />
+          <HouseholdListComponent />
         </View>
         <View key="2">
-          <StatisticComponent />
+          <StatisticView />
         </View>
       </PagerView>
     </View>

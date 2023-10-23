@@ -5,6 +5,7 @@ export interface Chore {
   energyLevel: string;
   frequency: string;
   // lastCompletedDate: Date;
+  dateCreated: Date;
   name: string;
 }
 

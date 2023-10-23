@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TextInput, Button } from "react-native-paper";
 import { useDispatch } from "react-redux";
-import { addChore } from "../chore/choreSlice";
+import { addChore } from "../store/choreSlice";
 import { View } from "react-native";
 import { database } from "../database/firebaseConfig";
 import { addDoc, collection } from "firebase/firestore"; // vet inte varför den inte finns. Men den funkar (addDoc)
@@ -13,6 +13,7 @@ const AddChoreComponent = () => {
     energyLevel: "",
     frequency: "",
     name: "",
+    dateCreated: new Date().toLocaleDateString(),
   });
 
   const handleAddChore = async () => {
@@ -21,21 +22,23 @@ const AddChoreComponent = () => {
       energyLevel: choreData.energyLevel,
       frequency: choreData.frequency,
       name: choreData.name,
+      dateCreated: choreData.dateCreated
     };
 
     try {
       await addDoc(collection(database, "chores"), newChore);
-      console.log(newChore);
-      dispatch(addChore(newChore));
+      dispatch(addChore(newChore)); // Detta funkar ändå. dateCreated som gnäller men får ut datum för tillagd chore
       setChoreData({
         description: "",
         energyLevel: "",
         frequency: "",
         name: "",
+        dateCreated: new Date().toLocaleDateString(),
       });
     } catch (error) {
       console.error("Error adding chore to Firestore:", error);
     }
+    console.log(newChore)
   };
 
   return (
@@ -66,6 +69,7 @@ const AddChoreComponent = () => {
         value={choreData.name}
         onChangeText={(text) => setChoreData({ ...choreData, name: text })}
       />
+    
       <Button mode="contained" onPress={handleAddChore}>
         Lägg till ny chore
       </Button>
