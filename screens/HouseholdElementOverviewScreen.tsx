@@ -4,6 +4,7 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Card, Button } from 'react-native-paper';
 import { auth } from '../database/firebaseConfig';
 import { updateApiHousehold } from '../api/household';
+import { getProfiles } from '../api/profiles';
 
 type RootStackParamList = {
   HouseholdElementOverviewScreen: { household: Household };
@@ -16,17 +17,21 @@ export default function HouseholdElementOverviewScreen () {
   const navigation = useNavigation();
   const { household } = route.params;
   const userID = auth.currentUser?.uid;
-
   const [profiles, setProfiles] = React.useState<Profile[]>([]);
-
   const [isOwner, setIsOwner] = React.useState(false);
   const [newHouseholdName, setNewHouseholdName] = React.useState(household.name);
 
   React.useEffect(() => {
+    async function fetchProfiles() {
+      const profilesData = await getProfiles();
+      setProfiles(profilesData);
+    }
+
     async function checkOwnership() {
       setIsOwner(userID === household.ownerID);
     }
-
+    
+    fetchProfiles();
     checkOwnership();
   }, [household.ownerID]);
 
