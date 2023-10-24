@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { Text, TextInput, Button, useTheme, Card } from "react-native-paper";
+  Text,
+  TextInput,
+  Button,
+  useTheme,
+  Card,
+  Checkbox,
+} from "react-native-paper";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { updateChoreDetails } from "../store/choreDetailsSlice";
@@ -24,6 +26,7 @@ const ChoreDetailsScreen = () => {
   const [newDescription, setNewDescription] = useState("");
   const [newFrequency, setNewFrequency] = useState(chore?.frequency || 1);
   const [newEnergyLevel, setNewEnergyLevel] = useState(chore?.energyLevel || 1);
+  const [lastCompletedChore, setLastCompletedChore] = useState(false);
   const [isFrequencySelectionVisible, setFrequencySelectionVisible] =
     useState(false);
   const [isEnergyLevelSelectionVisible, setEnergyLevelSelectionVisible] =
@@ -35,7 +38,7 @@ const ChoreDetailsScreen = () => {
       setNewDescription(chore.description);
       setNewFrequency(chore.frequency);
       setNewEnergyLevel(chore.energyLevel);
-      navigation.setOptions({title: chore.description})
+      navigation.setOptions({ title: chore.description });
     }
   }, [chore]);
 
@@ -43,6 +46,7 @@ const ChoreDetailsScreen = () => {
     if (!chore) {
       return;
     }
+ 
 
     const updatedChore = {
       ...chore,
@@ -50,7 +54,12 @@ const ChoreDetailsScreen = () => {
       description: newDescription,
       frequency: newFrequency,
       energyLevel: newEnergyLevel,
+     
+      
     };
+    if (lastCompletedChore) {
+      updatedChore.lastCompleted = new Date().toUTCString(); 
+    }
 
     try {
       const choreRef = doc(database, "chores", chore.id);
@@ -154,19 +163,33 @@ const ChoreDetailsScreen = () => {
             )}
           />
         </Card>
+        <View style={styles.buttomRow}>
+          <View style={styles.buttonBar}>
+            <Button
+              onPress={handleUpdateChore}
+              icon="pencil"
+              mode="contained"
+              color={theme.colors.primary}
+              style={styles.button}
+              labelStyle={styles.buttonLabel}
+              contentStyle={styles.buttonContent}
+            >
+              Save
+            </Button>
+          </View>
+          <View style={styles.checkbox}>
+            <Card style={styles.card}>
 
-        <View style={styles.buttonBar}>
-          <Button
-            onPress={handleUpdateChore}
-            icon="pencil"
-            mode="contained"
-            color={theme.colors.primary}
-            style={styles.button}
-            labelStyle={styles.buttonLabel}
-            contentStyle={styles.buttonContent}
-          >
-            Save
-          </Button>
+            <Checkbox.Item
+              label="Marked as finished"
+              status={lastCompletedChore ? "checked" : "unchecked"}
+              color="green"
+              onPress={() => {
+                setLastCompletedChore(!lastCompletedChore);
+              }}
+              />
+              </Card>
+          </View>
         </View>
       </ScrollView>
 
@@ -212,9 +235,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 20,
   },
+  buttomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   buttonBar: {
     flexDirection: "row",
     justifyContent: "flex-start",
+    alignItems: "flex-end",
+  },
+  checkbox: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
     alignItems: "flex-end",
   },
   button: {
