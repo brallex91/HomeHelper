@@ -1,13 +1,16 @@
 import * as React from "react";
 import { StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { Text, TextInput, useTheme } from "react-native-paper";
 
 export default function CreateProfile() {
     const emojis = ['🦊', '🐷', '🐸', '🐥', '🐙', '🐬', '🦉', '🦄'];
+    
+    const theme = useTheme();
 
     return (
         <View style={{ alignItems: "center" }}>
-            <Text>Text: Välj avatar</Text>
+            <TextInput placeholder="Profile Name" />
+            <Text style={styles.title}>Välj avatar</Text>
             <View style={styles.emojiContainer}>
                 {rowArray(emojis, 4).map((row, rowIndex) => (
                     <View style={styles.emojiRow} key={rowIndex}>
@@ -35,6 +38,9 @@ const styles = StyleSheet.create({
     emojiContainer: {
         alignItems: "center",
         justifyContent: "center",
+    },
+    title: {
+        fontSize: 24
     },
     emojiRow: {
         flexDirection: "row",
