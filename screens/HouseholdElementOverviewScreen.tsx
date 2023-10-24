@@ -12,27 +12,43 @@ type RootStackParamList = {
 
 type HouseholdElementOverviewScreenRouteProp = RouteProp<RootStackParamList, 'HouseholdElementOverviewScreen'>;
 
+export type EmojiKeys = 'fox' | 'pig' | 'frog' | 'chick' | 'octopus' | 'dolphin' | 'owl' | 'unicorn';
+
+export const emojiMap: Record<EmojiKeys, string> = {
+  fox: '🦊',
+  pig: '🐷',
+  frog: '🐸',
+  chick: '🐥',
+  octopus: '🐙',
+  dolphin: '🐬',
+  owl: '🦉',
+  unicorn: '🦄'
+};
+
 export default function HouseholdElementOverviewScreen () {
   const route = useRoute<HouseholdElementOverviewScreenRouteProp>();
   const navigation = useNavigation();
   const { household } = route.params;
-  const userID = auth.currentUser?.uid;
+  const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
+  const userID = auth.currentUser?.uid || userMockUID;
   const [profiles, setProfiles] = React.useState<Profile[]>([]);
   const [isOwner, setIsOwner] = React.useState(false);
-  const [newHouseholdName, setNewHouseholdName] = React.useState(household.name);
+  const [newHouseholdName, setNewHouseholdName] = React.useState("");
+
+
+  
 
   React.useEffect(() => {
+    async function checkOwnership() {
+      setIsOwner(userID === household.ownerID);
+    }
     async function fetchProfiles() {
       const profilesData = await getProfiles();
       setProfiles(profilesData);
     }
 
-    async function checkOwnership() {
-      setIsOwner(userID === household.ownerID);
-    }
-    
-    fetchProfiles();
     checkOwnership();
+    fetchProfiles();
   }, [household.ownerID]);
 
   async function handleNameChange() {
@@ -54,14 +70,18 @@ export default function HouseholdElementOverviewScreen () {
         keyExtractor={(item) => item}
         renderItem={({ item }) => {
           const profile = profiles.find(profile => profile.id === item);
+          let emoji: string | undefined;
+          if (profile && profile.avatar && emojiMap[profile.avatar as EmojiKeys]) {
+            emoji = emojiMap[profile.avatar as EmojiKeys];
+          }
           return (
             <Card style={styles.card}>
               <Card.Title
                 title={profile?.name}
                 right={(props) => (
-                  <Text style={styles.userIcons}>{profile?.avatar}</Text>
-                  )}
-                  />
+                  <Text style={styles.userIcons}>{emoji}</Text>
+                )}
+              />
             </Card>
           );
         }}
