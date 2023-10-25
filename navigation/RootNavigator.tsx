@@ -32,7 +32,7 @@ export default function RootNavigator() {
         component={CreateProfile}
         options={{
           headerTitleAlign: "center",
-          title: "Create Profile"
+          title: "Skapa Profil"
         }}
       />
       <RootStack.Screen

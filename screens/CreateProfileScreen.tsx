@@ -1,56 +1,107 @@
-import * as React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Text, TextInput, useTheme } from "react-native-paper";
+import { auth } from "../database/firebaseConfig";
 
-export default function CreateProfile() {
-    const emojis = ['🦊', '🐷', '🐸', '🐥', '🐙', '🐬', '🦉', '🦄'];
-    
-    const theme = useTheme();
+const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
+const userID = auth.currentUser?.uid || userMockUID;
 
-    return (
-        <View style={{ alignItems: "center" }}>
-            <TextInput placeholder="Profile Name" />
-            <Text style={styles.title}>Välj avatar</Text>
-            <View style={styles.emojiContainer}>
-                {rowArray(emojis, 4).map((row, rowIndex) => (
-                    <View style={styles.emojiRow} key={rowIndex}>
-                        {row.map((emoji, index) => (
-                            <Text style={styles.emoji} key={index}>
-                                {emoji}
-                            </Text>
-                        ))}
-                    </View>
-                ))}
-            </View>
-        </View>
-    );
-}
+const emojis: string[] = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"];
 
-function rowArray(array: string[] , rowSize: number) {
-    const result = [];
-    for (let i = 0; i < array.length; i += rowSize) {
-        result.push(array.slice(i, i + rowSize));
-    }
-    return result;
-}
+const getColorForEmoji = (emoji: string) => {
+  switch (emoji) {
+    case "🦊":
+      return "#ff7e46";
+    case "🐷":
+      return "#ffab91";
+    case "🐸":
+      return "#e4fb7d";
+    case "🐥":
+      return "#fcd932";
+    case "🐙":
+      return "#cd5d6f";
+    case "🐬":
+      return "#5dc5d6";
+    case "🦉":
+      return "#e1ae93";
+    case "🦄":
+      return "#ce84ce";
+    default:
+      return "#ff7e46";
+  }
+};
+
+const EmojiSelector = () => {
+  const theme = useTheme();
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+  const [emojiColor, setEmojiColor] = useState("#000000");
+
+  const handleEmojiClick = (emoji: string) => {
+    setSelectedEmoji(emoji);
+    setEmojiColor(getColorForEmoji(emoji));
+  };
+
+  const renderEmojis = () => {
+    return emojis.map((emoji, index) => (
+      <TouchableOpacity
+        key={index}
+        onPress={() => handleEmojiClick(emoji)}
+        style={[
+          styles.emojiContainer,
+          {
+            backgroundColor: getColorForEmoji(emoji),
+            borderColor:
+              emoji === selectedEmoji ? "#000000" : getColorForEmoji(emoji),
+          }, 
+        ]}
+      >
+        <Text style={[styles.emojiText, { color: theme.colors.primary }]}>
+          {emoji}
+        </Text>
+      </TouchableOpacity>
+    ));
+  };
+
+  return (
+    <View style={styles.container}>       
+        <TextInput style={styles.textinput} placeholder="Profilnamn"></TextInput>       
+      <ScrollView>
+        <View style={styles.emojiList}>{renderEmojis()}</View>
+      </ScrollView>
+      <Text style={{ color: theme.colors.primary }}>
+        Selected Emoji: {selectedEmoji || "None"}
+      </Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    emojiContainer: {
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    title: {
-        fontSize: 24
-    },
-    emojiRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    emoji: {
-        fontSize: 45,
-        flex: 1,
-        maxWidth: "25%",
-        alignItems: "center",
-    },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emojiList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center", 
+  },
+  emojiContainer: {
+    width: "25%",
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 5,
+    borderRadius: 60,
+    borderWidth: 3 
+  },
+  emojiText: {
+    fontSize: 36,
+  },
+  textinput: {
+    width: "90%",
+    marginTop: 10,
+    marginBottom: 10
+  }
 });
+
+export default EmojiSelector;
