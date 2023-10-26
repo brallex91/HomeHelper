@@ -1,5 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Chore } from "./choreSlice";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Profile {
   id: string;
@@ -11,9 +10,10 @@ export interface Household {
   id: string;
   name: string;
   key: string;
-  members: Profile[];
-  chores: Chore[];
+  members: string[];
+  chores: string[];
   ownerID: string;
+  userId: string[];
 }
 
 export interface HouseholdState {
@@ -25,7 +25,7 @@ const initialState: HouseholdState = {
 };
 
 export const householdSlice = createSlice({
-  name: "household",
+  name: 'household',
   initialState,
   reducers: {
     addHousehold: (state, action: PayloadAction<Household>) => {

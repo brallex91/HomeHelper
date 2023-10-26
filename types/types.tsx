@@ -11,6 +11,7 @@ interface Household {
   members: string[]; //Profile ID sparas här
   chores: string[]; //Chore ID sparas här
   ownerID: string; // ID för användaren som skapade hushållet
+  userId: string[];
 }
 
 interface ChoreCompletion {
