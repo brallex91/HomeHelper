@@ -26,7 +26,7 @@ const ChoreDetailsScreen = () => {
   const [newDescription, setNewDescription] = useState("");
   const [newFrequency, setNewFrequency] = useState(chore?.frequency || 1);
   const [newEnergyLevel, setNewEnergyLevel] = useState(chore?.energyLevel || 1);
-  const [lastCompletedChore, setLastCompletedChore] = useState(false);
+  // const [lastCompletedChore, setLastCompletedChore] = useState(false);
   const [isFrequencySelectionVisible, setFrequencySelectionVisible] =
     useState(false);
   const [isEnergyLevelSelectionVisible, setEnergyLevelSelectionVisible] =
@@ -46,21 +46,16 @@ const ChoreDetailsScreen = () => {
     if (!chore) {
       return;
     }
- 
-
+  
     const updatedChore = {
       ...chore,
       name: newName,
       description: newDescription,
       frequency: newFrequency,
       energyLevel: newEnergyLevel,
-     
-      
+      lastCompleted: new Date().toISOString() // Always update lastCompleted
     };
-    if (lastCompletedChore) {
-      updatedChore.lastCompleted = new Date().toUTCString(); 
-    }
-
+  
     try {
       const choreRef = doc(database, "chores", chore.id);
       await setDoc(choreRef, updatedChore);
@@ -177,7 +172,7 @@ const ChoreDetailsScreen = () => {
               Save
             </Button>
           </View>
-          <View style={styles.checkbox}>
+          {/* <View style={styles.checkbox}>
             <Card style={styles.card}>
 
             <Checkbox.Item
@@ -189,7 +184,7 @@ const ChoreDetailsScreen = () => {
               }}
               />
               </Card>
-          </View>
+          </View> */}
         </View>
       </ScrollView>
 

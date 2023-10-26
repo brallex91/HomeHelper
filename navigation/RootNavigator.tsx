@@ -27,7 +27,7 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <RootStack.Navigator initialRouteName='HouseholdOverview'>
+    <RootStack.Navigator initialRouteName='HouseholdChores'>
       <RootStack.Screen
         name='HouseholdChores'
         component={HouseholdChoreScreen}

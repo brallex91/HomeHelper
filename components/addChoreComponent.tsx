@@ -13,7 +13,8 @@ const AddChoreComponent = () => {
     energyLevel: "",
     frequency: "",
     name: "",
-    dateCreated: new Date().toLocaleDateString(),
+    dateCreated: new Date().toISOString() ,
+    lastCompleted: new Date().toISOString() 
   });
 
   const handleAddChore = async () => {
@@ -22,7 +23,8 @@ const AddChoreComponent = () => {
       energyLevel: choreData.energyLevel,
       frequency: choreData.frequency,
       name: choreData.name,
-      dateCreated: choreData.dateCreated
+      dateCreated: choreData.dateCreated,
+      lastCompleted: choreData.lastCompleted,
     };
 
     try {
@@ -33,12 +35,14 @@ const AddChoreComponent = () => {
         energyLevel: "",
         frequency: "",
         name: "",
-        dateCreated: new Date().toLocaleDateString(),
+        dateCreated: new Date().toISOString(),
+        lastCompleted: new Date().toISOString() 
       });
     } catch (error) {
       console.error("Error adding chore to Firestore:", error);
     }
-    console.log(newChore)
+    console.log("Date created:", choreData.dateCreated);
+    console.log("Last completed:", choreData.lastCompleted);
   };
 
   return (
@@ -69,7 +73,7 @@ const AddChoreComponent = () => {
         value={choreData.name}
         onChangeText={(text) => setChoreData({ ...choreData, name: text })}
       />
-    
+
       <Button mode="contained" onPress={handleAddChore}>
         Lägg till ny chore
       </Button>
