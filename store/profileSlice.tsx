@@ -18,13 +18,13 @@ export const profilesSlice = createSlice({
     name: "profiles",
     initialState,
     reducers: {
-        addChore: (state, action: PayloadAction<Profile>) => {
+        addProfile: (state, action: PayloadAction<Profile>) => {
             state.profiles.push(action.payload);
         },
     },
 });
 
-export const { addChore } = profilesSlice.actions;
+export const { addProfile } = profilesSlice.actions;
 
 export default profilesSlice.reducer;
 

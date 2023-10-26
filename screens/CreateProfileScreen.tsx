@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Text, TextInput, useTheme } from "react-native-paper";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { auth } from "../database/firebaseConfig";
 
 const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
@@ -34,6 +34,7 @@ const getColorForEmoji = (emoji: string) => {
 const EmojiSelector = () => {
   const theme = useTheme();
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState<Profile | null>(null);
   const [emojiColor, setEmojiColor] = useState("#000000");
 
   const handleEmojiClick = (emoji: string) => {
@@ -41,6 +42,11 @@ const EmojiSelector = () => {
     setEmojiColor(getColorForEmoji(emoji));
   };
 
+  const handleButtonPress = () => {
+    console.log(selectedEmoji);
+    console.log(userMockUID);
+  };
+  
   const renderEmojis = () => {
     return emojis.map((emoji, index) => (
       <TouchableOpacity
@@ -68,9 +74,10 @@ const EmojiSelector = () => {
       <ScrollView>
         <View style={styles.emojiList}>{renderEmojis()}</View>
       </ScrollView>
-      <Text style={{ color: theme.colors.primary }}>
-        Selected Emoji: {selectedEmoji || "None"}
-      </Text>
+      {/* <Text style={{ color: theme.colors.secondary }}>
+        Selected Emoji: {selectedEmoji || "None"}, {userMockUID}
+      </Text> */}
+      <Button style={styles.button} onPress={() => handleButtonPress()}>Skapa Profil</Button>
     </View>
   );
 };
@@ -101,6 +108,9 @@ const styles = StyleSheet.create({
     width: "90%",
     marginTop: 10,
     marginBottom: 10
+  },
+  button: {
+    backgroundColor: "black"
   }
 });
 
