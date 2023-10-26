@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Button, Card, useTheme } from 'react-native-paper';
 import { getHouseholdByCode, getHouseholds } from '../api/household';
+import { auth } from '../database/firebaseConfig';
 
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);
@@ -126,10 +127,16 @@ export default function HouseholdOverviewScreen() {
     </View>
   );
 
+  const currentUserHouseholds = households.filter(
+    (household) =>
+      Array.isArray(household.userId) &&
+      household.userId.some((id) => id === auth.currentUser?.uid)
+  );
+
   return (
     <View>
       <ScrollView contentContainerStyle={styles.cardContainer}>
-        {households.map((household) => (
+        {currentUserHouseholds.map((household) => (
           <Card
             key={household.id}
             style={styles.card}
