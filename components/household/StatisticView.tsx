@@ -1,6 +1,7 @@
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
+import { getCompletedChoresByHousehold } from "../../api/completedChores";
 import StatisticComponent from "./StatisticComponent";
 
 interface DataItem {
@@ -73,7 +74,51 @@ const mockChoreData: string[] = [
   "Chore6",
 ];
 
-const StatisticView: React.FC = () => {
+async function getChoreStatistics(
+  householdId: string
+): Promise<Array<{ profileId: string; choreId: string; completed: number }>> {
+  const completedChores = await getCompletedChoresByHousehold(householdId);
+  const statisticsArray: Array<{
+    profileId: string;
+    choreId: string;
+    completed: number;
+  }> = [];
+
+  completedChores.forEach((chore) => {
+    const { profileId, choreId } = chore;
+
+    // Hitta om en statistikpost redan finns för den här profilen och sysslan
+    const existingStat = statisticsArray.find(
+      (stat) => stat.profileId === profileId && stat.choreId === choreId
+    );
+
+    if (existingStat) {
+      // Om en statistikpost finns, öka den slutförda räkningen
+      existingStat.completed++;
+    } else {
+      // Om ingen statistikpost finns, skapa en ny med en slutförd räkning av 1
+      statisticsArray.push({ profileId, choreId, completed: 1 });
+    }
+  });
+
+  console.log(statisticsArray);
+  return statisticsArray;
+}
+
+const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
+  const [choreStatistics, setChoreStatistics] = React.useState<
+    Array<{ profileId: string; choreId: string; completed: number }>
+  >([]);
+
+  React.useEffect(() => {
+    async function fetchChoreStatistics() {
+      const statistics = await getChoreStatistics("nNVCHbnOztwqObuJ8Iuo");
+      setChoreStatistics(statistics);
+    }
+
+    fetchChoreStatistics();
+  }, [householdId]);
+
   return (
     <ScrollView style={styles.container}>
       <View
