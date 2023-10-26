@@ -1,3 +1,5 @@
+
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Chore {
@@ -6,7 +8,7 @@ export interface Chore {
   description: string;
   frequency: number; // Antal dagar
   energyLevel: number; // 1, 2, 4, 6 eller 8
-  lastCompletedDate?: Date; // Datum när sysslan senast slutfördes
+  lastCompleted: Date | undefined  // Datum när sysslan senast slutfördes
   dateCreated: Date; // Datum när sysslan skapades
 }
 
