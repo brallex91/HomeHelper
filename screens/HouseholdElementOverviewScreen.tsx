@@ -5,6 +5,7 @@ import { Card, Button } from 'react-native-paper';
 import { auth } from '../database/firebaseConfig';
 import { updateApiHousehold } from '../api/household';
 import { getProfiles } from '../api/profiles';
+import { Household } from '../store/houseHoldSlice';
 
 type RootStackParamList = {
   HouseholdElementOverviewScreen: { household: Household };
