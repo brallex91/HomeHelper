@@ -5,8 +5,18 @@ import PagerView from "react-native-pager-view";
 import { Text, useTheme } from "react-native-paper";
 import HouseholdListComponent from "../components/household/HouseholdListComponent";
 import StatisticView from "../components/household/StatisticView";
+import { Household } from "../store/houseHoldSlice";
+import { RouteProp, useRoute } from "@react-navigation/native";
+
+type RootStackParamList = {
+  HouseholdChoreScreen: { household: Household };
+};
+
+type HouseholdChoreScreenRouteProp = RouteProp<RootStackParamList, 'HouseholdChoreScreen'>;
 
 export default function HouseholdChoreScreen() {
+  const route = useRoute<HouseholdChoreScreenRouteProp>();
+  const { household } = route.params;
   const [currentPage, setCurrentPage] = useState(0);
   const pageNames = ["Idag", "Förra Veckan"];
   const pagerRef = useRef<PagerView | null>(null);
@@ -54,10 +64,10 @@ export default function HouseholdChoreScreen() {
         onPageSelected={handlePageSelected}
       >
         <View key="1">
-          <HouseholdListComponent />
+          <HouseholdListComponent household={household} />
         </View>
         <View key="2">
-          <StatisticView />
+          <StatisticView householdId={""} />
         </View>
       </PagerView>
     </View>

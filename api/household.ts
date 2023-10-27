@@ -7,6 +7,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { database } from '../database/firebaseConfig';
+import { Household } from '../store/houseHoldSlice';
 
 export async function updateApiHousehold(household: Household) {
   const householdRef = doc(database, 'households', household.id);
