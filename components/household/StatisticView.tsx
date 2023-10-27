@@ -55,8 +55,6 @@ const getChoreStatistics = async (
   const profiles = await getProfiles();
   const profileAvatarMap = Object.fromEntries(profiles.map(profile => [profile.id, profile.avatar]));
 
-  console.log('Profile Avatar Map:', profileAvatarMap);
-
   const statisticsMap: Map<string, { profileId: string; choreId: string; completed: number; avatar: EmojiKeys }> = new Map();
 
   completedChores.forEach((chore) => {
@@ -65,7 +63,6 @@ const getChoreStatistics = async (
     const key = `${profileId}-${choreId}`;
     const avatar = profileAvatarMap[profileId] as EmojiKeys;
 
-    console.log('Avatar for profileId', profileId, ':', avatar);
     const existingStat = statisticsMap.get(key);
 
     if (existingStat) {
