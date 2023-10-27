@@ -6,9 +6,10 @@ import { auth } from "../database/firebaseConfig";
 const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
 const userID = auth.currentUser?.uid || userMockUID;
 
-const emojis: string[] = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"];
+const emojis = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"] as const;
+type Emoji = typeof emojis[number];
 
-const getColorForEmoji = (emoji: string) => {
+const getColorForEmoji = (emoji?: Emoji) => {
   switch (emoji) {
     case "🦊":
       return "#ff7e46";
@@ -33,11 +34,16 @@ const getColorForEmoji = (emoji: string) => {
 
 const EmojiSelector = () => {
   const theme = useTheme();
-  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
-  const [profileName, setProfileName] = useState<Profile | null>(null);
+  const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
+  const [profileData, setProfileData] = useState<Profile>({
+    id: "",
+    name: "",
+    avatar: "",
+    userId: ""
+  });
   const [emojiColor, setEmojiColor] = useState("#000000");
 
-  const handleEmojiClick = (emoji: string) => {
+  const handleEmojiClick = (emoji: Emoji) => {
     setSelectedEmoji(emoji);
     setEmojiColor(getColorForEmoji(emoji));
   };
@@ -74,9 +80,6 @@ const EmojiSelector = () => {
       <ScrollView>
         <View style={styles.emojiList}>{renderEmojis()}</View>
       </ScrollView>
-      {/* <Text style={{ color: theme.colors.secondary }}>
-        Selected Emoji: {selectedEmoji || "None"}, {userMockUID}
-      </Text> */}
       <Button style={styles.button} onPress={() => handleButtonPress()}>Skapa Profil</Button>
     </View>
   );
