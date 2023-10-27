@@ -3,6 +3,8 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 import { getCompletedChoresByHousehold } from "../../api/completedChores";
 import StatisticComponent from "./StatisticComponent";
+import { emojiMap, EmojiKeys } from '../../screens/HouseholdElementOverviewScreen';
+import { getProfiles } from "../../api/profiles";
 
 interface DataItem {
   number: number;
@@ -35,51 +37,51 @@ const getColorForEmoji = (emoji: string) => {
   }
 };
 
+
 const mapStatisticsToDataItems = (
-  statistics: Array<{ profileId: string; choreId: string; completed: number }>
+  statistics: Array<{ profileId: string; choreId: string; completed: number; avatar: EmojiKeys }>
 ): DataItem[] => {
-  return statistics.map((stat, index) => {
-    const emoji = emojis[index % emojis.length];  // Cycle through emojis
+  return statistics.map((stat) => {
+    const emoji = emojiMap[stat.avatar] || '❓';
     const color = getColorForEmoji(emoji);
     return { number: stat.completed, emoji, color };
   });
 };
 
-
-async function getChoreStatistics(
+const getChoreStatistics = async (
   householdId: string
-): Promise<Array<{ profileId: string; choreId: string; completed: number }>> {
+): Promise<Array<{ profileId: string; choreId: string; completed: number; avatar: EmojiKeys }>> => {
   const completedChores = await getCompletedChoresByHousehold(householdId);
-  const statisticsMap: Map<string, { profileId: string; choreId: string; completed: number }> = new Map();
+  const profiles = await getProfiles();
+  const profileAvatarMap = Object.fromEntries(profiles.map(profile => [profile.id, profile.avatar]));
+  const profileNameIdMap = Object.fromEntries(profiles.map(profile => [profile.name, profile.id]));  // Assumes profiles have a 'name' field
+  console.log('Profile Avatar Map:', profileAvatarMap);
+
+  const statisticsMap: Map<string, { profileId: string; choreId: string; completed: number; avatar: EmojiKeys }> = new Map();
 
   completedChores.forEach((chore) => {
-    // Trim any extra whitespace from the profileId and choreId
-    const profileId = chore.profileId.trim();
+    const profileId = profileNameIdMap[chore.profileId.trim()];  // Map profile names to identifier strings
     const choreId = chore.choreId.trim();
-    const key = `${profileId}-${choreId}`;  // Create a unique key for each profile-chore pair
+    const key = `${profileId}-${choreId}`;
+    const avatar = profileAvatarMap[profileId] as EmojiKeys;
 
+    console.log('Avatar for profileId', profileId, ':', avatar);
     const existingStat = statisticsMap.get(key);
 
     if (existingStat) {
-      // If a statistics entry exists, increment the completed count
       existingStat.completed++;
     } else {
-      // If no statistics entry exists, create a new one with a completed count of 1
-      statisticsMap.set(key, { profileId, choreId, completed: 1 });
+      statisticsMap.set(key, { profileId, choreId, completed: 1, avatar });
     }
   });
 
-  // Convert the Map to an Array before returning
-  const statisticsArray = Array.from(statisticsMap.values());
-  
-  console.log(statisticsArray);
-  return statisticsArray;
-}
+  return Array.from(statisticsMap.values());
+};
 
 
 const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
   const [choreStatistics, setChoreStatistics] = React.useState<
-    Array<{ profileId: string; choreId: string; completed: number }>
+    Array<{ profileId: string; choreId: string; completed: number; avatar: EmojiKeys }>
   >([]);
 
   React.useEffect(() => {
