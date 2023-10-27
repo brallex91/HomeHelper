@@ -5,6 +5,7 @@ interface Profile {
   userId: string;
 }
 
+
 interface Household {
   id: string;
   name: string;

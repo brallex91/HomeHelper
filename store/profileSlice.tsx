@@ -3,8 +3,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface Profile {
     id: string;
     name: string;
-    avatar: string;
-}
+    avatar: string; 
+    userId: string;
+  }
+
+export type ProfileCreate = Omit<Profile, "id">
+
 
 export interface ProfileState {
     profiles: Profile[];

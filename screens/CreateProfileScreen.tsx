@@ -1,11 +1,13 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { addProfile } from "../api/profiles";
 import { auth } from "../database/firebaseConfig";
+import { ProfileCreate } from "../store/profileSlice";
 
 const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
 const userID = auth.currentUser?.uid || userMockUID;
-
 const emojis = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"] as const;
 type Emoji = typeof emojis[number];
 
@@ -34,23 +36,27 @@ const getColorForEmoji = (emoji?: Emoji) => {
 
 const EmojiSelector = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
   const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
-  const [profileData, setProfileData] = useState<Profile>({
-    id: "",
+  const [profileData, setProfileData] = useState<ProfileCreate>({
     name: "",
     avatar: "",
-    userId: ""
+    userId: userID
   });
   const [emojiColor, setEmojiColor] = useState("#000000");
 
   const handleEmojiClick = (emoji: Emoji) => {
     setSelectedEmoji(emoji);
     setEmojiColor(getColorForEmoji(emoji));
+    setProfileData((prevData) => ({
+      ...prevData,
+      avatar: emoji,
+    }));
   };
 
-  const handleButtonPress = () => {
-    console.log(selectedEmoji);
-    console.log(userMockUID);
+  const handleButtonPress = async () => {
+     addProfile(profileData);
+     navigation.navigate("HouseholdChores");
   };
   
   const renderEmojis = () => {
@@ -76,7 +82,12 @@ const EmojiSelector = () => {
 
   return (
     <View style={styles.container}>       
-        <TextInput style={styles.textinput} placeholder="Profilnamn"></TextInput>       
+        <TextInput value={profileData.name} 
+                   style={styles.textinput} 
+                   onChangeText={(text) =>
+                    setProfileData({ ...profileData, name: text })
+                  }
+                   placeholder="Profilnamn" />       
       <ScrollView>
         <View style={styles.emojiList}>{renderEmojis()}</View>
       </ScrollView>
