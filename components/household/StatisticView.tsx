@@ -5,6 +5,8 @@ import { getCompletedChoresByHousehold } from "../../api/completedChores";
 import StatisticComponent from "./StatisticComponent";
 import { emojiMap, EmojiKeys } from '../../screens/HouseholdElementOverviewScreen';
 import { getProfiles } from "../../api/profiles";
+import { Chore } from "../../store/choreSlice";
+import { getChores } from "../../api/chores";
 
 interface DataItem {
   number: number;
@@ -39,7 +41,7 @@ const getColorForEmoji = (emoji: string) => {
 
 
 const mapStatisticsToDataItems = (
-  statistics: Array<{ profileId: string; choreId: string; completed: number; avatar: EmojiKeys }>
+  statistics: Array<{ profileId: string; completed: number; avatar: EmojiKeys }>
 ): DataItem[] => {
   return statistics.map((stat) => {
     const emoji = emojiMap[stat.avatar] || '❓';
@@ -50,53 +52,111 @@ const mapStatisticsToDataItems = (
 
 const getChoreStatistics = async (
   householdId: string
-): Promise<Array<{ profileId: string; choreId: string; completed: number; avatar: EmojiKeys }>> => {
+): Promise<Array<{ profileId: string; completed: number; avatar: EmojiKeys }>> => {
   const completedChores = await getCompletedChoresByHousehold(householdId);
   const profiles = await getProfiles();
   const profileAvatarMap = Object.fromEntries(profiles.map(profile => [profile.id, profile.avatar]));
-  const profileNameIdMap = Object.fromEntries(profiles.map(profile => [profile.name, profile.id]));  // Assumes profiles have a 'name' field
-  console.log('Profile Avatar Map:', profileAvatarMap);
+  const profileNameIdMap = Object.fromEntries(profiles.map(profile => [profile.name, profile.id]));  
 
-  const statisticsMap: Map<string, { profileId: string; choreId: string; completed: number; avatar: EmojiKeys }> = new Map();
+  const statisticsMap: Map<string, { profileId: string; completed: number; avatar: EmojiKeys }> = new Map();
 
   completedChores.forEach((chore) => {
-    const profileId = profileNameIdMap[chore.profileId.trim()];  // Map profile names to identifier strings
-    const choreId = chore.choreId.trim();
-    const key = `${profileId}-${choreId}`;
+    const profileId = profileNameIdMap[chore.profileId.trim()];
     const avatar = profileAvatarMap[profileId] as EmojiKeys;
 
-    console.log('Avatar for profileId', profileId, ':', avatar);
-    const existingStat = statisticsMap.get(key);
+    const existingStat = statisticsMap.get(profileId);
 
     if (existingStat) {
       existingStat.completed++;
     } else {
-      statisticsMap.set(key, { profileId, choreId, completed: 1, avatar });
+      statisticsMap.set(profileId, { profileId, completed: 1, avatar });
     }
   });
-
   return Array.from(statisticsMap.values());
+};
+
+interface ChoreStatistics {
+  [choreName: string]: {
+    [profileName: string]: {
+      count: number;
+      avatar: EmojiKeys;
+    };
+  };
+}
+
+const mapChoreStatisticsToDataItems = (
+  statistics: ChoreStatistics
+): Record<string, DataItem[]> => {
+  const result: Record<string, DataItem[]> = {};
+
+  for (const choreName in statistics) {
+    result[choreName] = Object.values(statistics[choreName]).map(({ count, avatar }) => ({
+      number: count,
+      emoji: emojiMap[avatar] || '❓',
+      color: getColorForEmoji(emojiMap[avatar] || '❓'),
+    }));
+  }
+
+  return result;
+};
+
+
+const getHouseholdChoreStatistics = async (householdId: string) => {
+  const completedChores = await getCompletedChoresByHousehold(householdId);
+  const profiles = await getProfiles();
+  const chores = await getChores();
+
+  const profileIdMap = Object.fromEntries(profiles.map(profile => [profile.id, profile]));
+  const choreIdMap = Object.fromEntries(chores.map(chore => [chore.id, chore]));
+
+  const statistics: ChoreStatistics = {};
+
+  completedChores.forEach(chore => {
+    const choreName = choreIdMap[chore.choreId]?.name || 'Unknown Chore';
+    const profileId = chore.profileId;
+    const profile = profileIdMap[profileId];
+    const profileName = profile?.name || 'Unknown Profile';
+    const avatar = (profile?.avatar || '❓') as EmojiKeys;  // assert as EmojiKeys
+
+    if (!statistics[choreName]) {
+      statistics[choreName] = {};
+    }
+
+    if (!statistics[choreName][profileName]) {
+      statistics[choreName][profileName] = { count: 0, avatar };
+    }
+
+    statistics[choreName][profileName].count++;
+  });
+
+  return statistics;
 };
 
 
 const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
-  const [choreStatistics, setChoreStatistics] = React.useState<
-    Array<{ profileId: string; choreId: string; completed: number; avatar: EmojiKeys }>
-  >([]);
+  const [choreStatistics, setChoreStatistics] = React.useState<Array<{ profileId: string; completed: number; avatar: EmojiKeys }>>([]);
+  const [householdChoreStatistics, setHouseholdChoreStatistics] = React.useState<ChoreStatistics>({});
+
 
   React.useEffect(() => {
-    async function fetchChoreStatistics() {
-      const statistics = await getChoreStatistics("Hus 1");
-      setChoreStatistics(statistics);
+    async function fetchStatistics() {
+      const choreStats = await getChoreStatistics("Hus 1");
+      const householdChoreStats = await getHouseholdChoreStatistics("Hus 1");
+      setChoreStatistics(choreStats);
+      setHouseholdChoreStatistics(householdChoreStats);
     }
-
-    fetchChoreStatistics();
+  
+    fetchStatistics();
   }, [householdId]);
+  
+  
 
   const dataItems = React.useMemo(() => mapStatisticsToDataItems(choreStatistics), [choreStatistics]);
+  const choreDataItems = React.useMemo(() => mapChoreStatisticsToDataItems(householdChoreStatistics), [householdChoreStatistics]);
 
   return (
     <ScrollView style={styles.container}>
+      {/*Show total*/}
       <View
         style={{
           justifyContent: "center",
@@ -113,9 +173,9 @@ const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
           <Text style={styles.chartTitle}>Totalt</Text>
         </View>
       </View>
-
+      {/*Show individual chore*/}
       <View style={[styles.flexContainer, { marginTop: 20 }]}>
-        {dataItems.map((category, index) => (
+        {Object.entries(choreDataItems).map(([choreName, dataItems], index) => (
           <View key={index} style={styles.flexItem}>
             <View style={styles.chartContainer}>
               <StatisticComponent
@@ -123,7 +183,7 @@ const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
                 chartSize={100}
                 emojiSize={15}
               />
-              {/* <Text style={styles.chartTitle}>{category}</Text> */}
+              <Text style={styles.chartTitle}>{choreName}</Text>
             </View>
           </View>
         ))}
