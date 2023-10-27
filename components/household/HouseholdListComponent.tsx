@@ -37,7 +37,6 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
   useFocusEffect(
     React.useCallback(() => {
       async function fetchChores() {
-        console.log("Household did arrive!", household);
         try {
           const choresCollection = collection(database, "chores");
           const choresData: Chore[] = [];

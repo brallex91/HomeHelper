@@ -21,6 +21,7 @@ export default function HouseholdChoreScreen() {
   const pageNames = ["Idag", "Förra Veckan"];
   const pagerRef = useRef<PagerView | null>(null);
   const theme = useTheme();
+  const householdId = household.id;
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pageNames.length) {
@@ -67,7 +68,7 @@ export default function HouseholdChoreScreen() {
           <HouseholdListComponent household={household} />
         </View>
         <View key="2">
-          <StatisticView householdId={""} />
+          <StatisticView householdId={householdId} />
         </View>
       </PagerView>
     </View>
