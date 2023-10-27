@@ -1,12 +1,18 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { Button, Card, Text, useTheme } from "react-native-paper";
+import { useDispatch } from "react-redux";
 import { getChores } from "../../api/chores";
-import { useDispatch } from 'react-redux';
 import { setChoreDetails } from "../../store/choreDetailsSlice";
+import { Chore } from "../../store/choreSlice";
 
-export default function HomeComponent() {
+export default function HouseholdListComponent() {
   const dispatch = useDispatch();
   const [chores, setChores] = React.useState<Chore[]>([]);
   const navigation = useNavigation();
@@ -17,7 +23,7 @@ export default function HomeComponent() {
   };
 
   const navigateToChoreDetails = (chore: any) => {
-    dispatch(setChoreDetails(chore)); 
+    dispatch(setChoreDetails(chore));
     navigation.navigate("ChoreDetails");
   };
 
@@ -33,8 +39,29 @@ export default function HomeComponent() {
       }
 
       fetchChores();
-    }, []),
+    }, [])
   );
+
+
+  const getDaysLeftToDoChore = (lastCompleted: Date, interval: number) => {
+    // Skapar en ny datumobjekt baserat på när uppgiften senast utfördes.
+    const nextDueDate = new Date(lastCompleted);
+    
+    // Lägger till intervallet (i dagar) till det senaste utförda datumet för att få nästa datum då uppgiften ska utföras.
+    nextDueDate.setDate(lastCompleted.getDate() + interval);
+    
+    // Skapar ett nytt datumobjekt för nuvarande tidpunkt.
+    const dateNow = new Date();
+    
+    // Räknar ut tidsdifferensen (i millisekunder) mellan nästa utförda datum och nuvarande tidpunkt.
+    const timeDifference = nextDueDate.getTime() - dateNow.getTime();
+    
+    // Omvandlar tidsdifferensen från millisekunder till dagar.
+    const daysLeft = timeDifference / (1000 * 60 * 60 * 24);
+    
+    // Returnerar tidsdifferensen avrundad uppåt (eftersom vi vill ha hela dagar).
+    return Math.ceil(daysLeft);
+};
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
@@ -65,16 +92,34 @@ export default function HomeComponent() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
-        {chores.map((chore) => (
-          <Card key={chore.id} style={styles.card}>
-            <Card.Title
-              title={chore.name}
-              right={(props) => <Text style={styles.userIcons}>🐷</Text>}
-            />
-            <Button mode="contained" onPress={() => navigateToChoreDetails(chore)}>Info</Button>
-          </Card>
-        ))}
+        {chores.map((chore) => {
+          const validLastCompletedDate = chore.lastCompleted;
+          const daysLeft = validLastCompletedDate ? getDaysLeftToDoChore(new Date(validLastCompletedDate),chore.frequency): null;
+          const isOverdue = daysLeft !== null && daysLeft <= 0;
+
+          return (
+            <TouchableWithoutFeedback
+              key={chore.id}
+              onPress={() => navigateToChoreDetails(chore)}
+            >
+              <Card style={styles.card}>
+                <Card.Title
+                  title={chore.name}
+                  left={(props) => (
+                    <>
+                      <Text style={isOverdue ? { color: "red" } : {}}>
+                        {isOverdue ? ` ${Math.abs(daysLeft)} ` : `${daysLeft} `}
+                      </Text>
+                    </>
+                  )}
+                  right={(props) => <Text style={styles.userIcons}>🐷</Text>}
+                />
+              </Card>
+            </TouchableWithoutFeedback>
+          );
+        })}
       </ScrollView>
+
       <BottomButtonBar />
     </View>
   );

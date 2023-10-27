@@ -1,5 +1,6 @@
 import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { database } from "../database/firebaseConfig";
+import { Chore } from "../store/choreSlice";
 
 export async function getChores(): Promise<Chore[]> {
   const querySnapshot = await getDocs(collection(database, "chores"));

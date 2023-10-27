@@ -1,25 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
-import { Text, TextInput, Button, useTheme, Card } from "react-native-paper";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import {
+  Text,
+  TextInput,
+  Button,
+  useTheme,
+  Card,
+  Checkbox,
+} from "react-native-paper";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { updateChoreDetails } from "../store/choreDetailsSlice";
 import { useDispatch } from "react-redux";
-
+import NumberSelectionModal from "../components/NumberSelectionModal";
 import { doc, setDoc } from "firebase/firestore";
 import { database } from "../database/firebaseConfig";
+import { useNavigation } from "@react-navigation/native";
 
 const ChoreDetailsScreen = () => {
+  const navigation = useNavigation();
   const chore = useSelector((state: RootState) => state.choreDetails.chore);
   const dispatch = useDispatch();
   const theme = useTheme();
   const [newName, setNewName] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [newFrequency, setNewFrequency] = useState(chore?.frequency || 1);
+  const [newEnergyLevel, setNewEnergyLevel] = useState(chore?.energyLevel || 1);
+  // const [lastCompletedChore, setLastCompletedChore] = useState(false);
+  const [isFrequencySelectionVisible, setFrequencySelectionVisible] =
+    useState(false);
+  const [isEnergyLevelSelectionVisible, setEnergyLevelSelectionVisible] =
+    useState(false);
 
   useEffect(() => {
     if (chore) {
       setNewName(chore.name);
       setNewDescription(chore.description);
+      setNewFrequency(chore.frequency);
+      setNewEnergyLevel(chore.energyLevel);
+      navigation.setOptions({ title: chore.description });
     }
   }, [chore]);
 
@@ -27,13 +46,16 @@ const ChoreDetailsScreen = () => {
     if (!chore) {
       return;
     }
-
+  
     const updatedChore = {
       ...chore,
       name: newName,
       description: newDescription,
+      frequency: newFrequency,
+      energyLevel: newEnergyLevel,
+      lastCompleted: new Date().toISOString() // Always update lastCompleted
     };
-
+  
     try {
       const choreRef = doc(database, "chores", chore.id);
       await setDoc(choreRef, updatedChore);
@@ -47,6 +69,32 @@ const ChoreDetailsScreen = () => {
   if (!chore) {
     return <Text>No chore selected.</Text>;
   }
+
+  const openFrequencySelectionModal = () => {
+    setFrequencySelectionVisible(true);
+  };
+
+  const closeFrequencySelectionModal = () => {
+    setFrequencySelectionVisible(false);
+  };
+
+  const openEnergyLevelSelectionModal = () => {
+    setEnergyLevelSelectionVisible(true);
+  };
+
+  const closeEnergyLevelSelectionModal = () => {
+    setEnergyLevelSelectionVisible(false);
+  };
+
+  const selectFrequency = (number: number) => {
+    setNewFrequency(number);
+    closeFrequencySelectionModal();
+  };
+
+  const selectEnergyLevel = (number: number) => {
+    setNewEnergyLevel(number);
+    closeEnergyLevelSelectionModal();
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -70,7 +118,7 @@ const ChoreDetailsScreen = () => {
           <Card.Title
             title={
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text>Descrition: </Text>
+                <Text>Description: </Text>
                 <TextInput
                   mode="outlined"
                   value={newDescription}
@@ -85,36 +133,72 @@ const ChoreDetailsScreen = () => {
           <Card.Title
             title="Frequency"
             right={() => (
-              <View style={styles.redCircle}>
-                <Text>{chore.frequency}</Text>
-              </View>
+              <TouchableOpacity onPress={openFrequencySelectionModal}>
+                <View style={styles.textRow}>
+                  <Text>var</Text>
+                  <View style={styles.redCircle}>
+                    <Text style={{ color: "white" }}>{newFrequency}</Text>
+                  </View>
+                  <Text>dag</Text>
+                </View>
+              </TouchableOpacity>
             )}
           />
         </Card>
         <Card style={styles.card}>
           <Card.Title
             title="Energy Level"
-            subtitle="How energy-demanding is the task? "
+            subtitle="How energy-demanding is the task?"
             right={() => (
-              <Text style={{ paddingRight: 20 }}>{chore.energyLevel}</Text>
+              <TouchableOpacity onPress={openEnergyLevelSelectionModal}>
+                <View style={styles.greyCircle}>
+                  <Text>{newEnergyLevel}</Text>
+                </View>
+              </TouchableOpacity>
             )}
           />
         </Card>
+        <View style={styles.buttomRow}>
+          <View style={styles.buttonBar}>
+            <Button
+              onPress={handleUpdateChore}
+              icon="pencil"
+              mode="contained"
+              color={theme.colors.primary}
+              style={styles.button}
+              labelStyle={styles.buttonLabel}
+              contentStyle={styles.buttonContent}
+            >
+              Save
+            </Button>
+          </View>
+          {/* <View style={styles.checkbox}>
+            <Card style={styles.card}>
 
-        <View style={styles.buttonBar}>
-          <Button
-            onPress={handleUpdateChore}
-            icon="pencil"
-            mode="contained"
-            buttonColor={theme.colors.primary}
-            style={styles.button}
-            labelStyle={styles.buttonLabel}
-            contentStyle={styles.buttonContent}
-          >
-            Spara
-          </Button>
+            <Checkbox.Item
+              label="Marked as finished"
+              status={lastCompletedChore ? "checked" : "unchecked"}
+              color="green"
+              onPress={() => {
+                setLastCompletedChore(!lastCompletedChore);
+              }}
+              />
+              </Card>
+          </View> */}
         </View>
       </ScrollView>
+
+      <NumberSelectionModal
+        isVisible={isFrequencySelectionVisible}
+        closeModal={closeFrequencySelectionModal}
+        selectNumber={selectFrequency}
+      />
+
+      <NumberSelectionModal
+        isVisible={isEnergyLevelSelectionVisible}
+        closeModal={closeEnergyLevelSelectionModal}
+        selectNumber={selectEnergyLevel}
+      />
     </View>
   );
 };
@@ -126,24 +210,39 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 10,
   },
-
   card: {
     marginHorizontal: 10,
     marginVertical: 5,
   },
+
   redCircle: {
     width: 20,
     height: 20,
     backgroundColor: "red",
     borderRadius: 10,
-    marginRight: 10,
     alignItems: "center",
   },
-
+  greyCircle: {
+    width: 20,
+    height: 20,
+    backgroundColor: "lightgrey",
+    borderRadius: 10,
+    alignItems: "center",
+    marginRight: 20,
+  },
+  buttomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   buttonBar: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginTop: 300,
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+  },
+  checkbox: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
   },
   button: {
     marginHorizontal: 4,
@@ -157,5 +256,9 @@ const styles = StyleSheet.create({
   buttonContent: {
     padding: 8,
   },
-  cardText: {},
+  textRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginRight: 10,
+  },
 });

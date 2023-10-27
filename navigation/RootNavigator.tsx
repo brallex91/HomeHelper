@@ -1,14 +1,15 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import React from "react";
-import AddChoreScreen from "../screens/AddChoreScreen";
-import AddNewHousehold from "../screens/AddHouseholdScreen";
-import ChoreDetailsScreen from "../screens/ChoreDetailsScreen";
-import CreateProfile from "../screens/CreateProfileScreen";
-import HouseholdChoreScreen from "../screens/HouseholdChoreScreen";
-import HouseholdOverviewScreen from "../screens/HouseholdOverviewScreen";
-import LoginScreen from "../screens/LoginScreen";
-import RegisterScreen from "../screens/RegisterScreen";
-import WelcomeScreen from "../screens/WelcomeScreen";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
+import AddChoreScreen from '../screens/AddChoreScreen';
+import AddNewHousehold from '../screens/AddHouseholdScreen';
+import ChoreDetailsScreen from '../screens/ChoreDetailsScreen';
+import HouseholdChoreScreen from '../screens/HouseholdChoreScreen';
+import HouseholdElementOverviewScreen from '../screens/HouseholdElementOverviewScreen';
+import HouseholdOverviewScreen from '../screens/HouseholdOverviewScreen';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import WelcomeScreen from '../screens/WelcomeScreen';
+import { Household } from '../store/houseHoldSlice';
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -18,6 +19,7 @@ export type RootStackParamList = {
   HouseholdOverview: undefined;
   AddNewChore: undefined;
   AddNewHousehold: undefined;
+  HouseholdElementOverviewScreen: { household: Household };
   ChoreDetails: undefined;
   CreateProfile: undefined;
 };
@@ -26,69 +28,68 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <RootStack.Navigator>
+    <RootStack.Navigator initialRouteName='HouseholdChores'>
       <RootStack.Screen
-        name="CreateProfile"
-        component={CreateProfile}
-        options={{
-          headerTitleAlign: "center",
-          title: "Skapa Profil"
-        }}
-      />
-      <RootStack.Screen
-        name="HouseholdChores"
+        name='HouseholdChores'
         component={HouseholdChoreScreen}
         options={{
           headerShown: false,
         }}
       />
       <RootStack.Screen
-        name="Welcome"
+        name='Welcome'
         component={WelcomeScreen}
         options={{
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
         }}
       />
       <RootStack.Screen
-        name="HouseholdOverview"
+        name='HouseholdOverview'
         component={HouseholdOverviewScreen}
         options={{
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
         }}
       />
       <RootStack.Screen
-        name="Login"
+        name='HouseholdElementOverviewScreen'
+        component={HouseholdElementOverviewScreen}
+        options={{
+          headerTitleAlign: 'center',
+        }}
+      />
+      <RootStack.Screen
+        name='Login'
         component={LoginScreen}
         options={{
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
         }}
       />
       <RootStack.Screen
-        name="Register"
+        name='Register'
         component={RegisterScreen}
         options={{
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
         }}
       />
       <RootStack.Screen
-        name="AddNewChore"
+        name='AddNewChore'
         component={AddChoreScreen}
         options={{
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
         }}
       />
       <RootStack.Screen
-        name="AddNewHousehold"
+        name='AddNewHousehold'
         component={AddNewHousehold}
         options={{
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
         }}
       />
-       <RootStack.Screen
-        name="ChoreDetails"
+      <RootStack.Screen
+        name='ChoreDetails'
         component={ChoreDetailsScreen}
         options={{
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
         }}
       />
     </RootStack.Navigator>
