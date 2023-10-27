@@ -3,9 +3,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 import { getCompletedChoresByHousehold } from "../../api/completedChores";
 import StatisticComponent from "./StatisticComponent";
-import { emojiMap, EmojiKeys } from '../../screens/HouseholdElementOverviewScreen';
 import { getProfiles } from "../../api/profiles";
-import { Chore } from "../../store/choreSlice";
 import { getChores } from "../../api/chores";
 
 interface DataItem {
@@ -39,6 +37,18 @@ const getColorForEmoji = (emoji: string) => {
   }
 };
 
+export type EmojiKeys = 'fox' | 'pig' | 'frog' | 'chick' | 'octopus' | 'dolphin' | 'owl' | 'unicorn';
+
+export const emojiMap: Record<EmojiKeys, string> = {
+  fox: '🦊',
+  pig: '🐷',
+  frog: '🐸',
+  chick: '🐥',
+  octopus: '🐙',
+  dolphin: '🐬',
+  owl: '🦉',
+  unicorn: '🦄'
+};
 
 const mapStatisticsToDataItems = (
   statistics: Array<{ profileId: string; completed: number; avatar: EmojiKeys }>
@@ -69,11 +79,12 @@ const getChoreStatistics = async (
     if (existingStat) {
       existingStat.completed++;
     } else {
-      statisticsMap.set(profileId, { profileId, completed: 1, avatar });
+      statisticsMap.set(profileId, { profileId, completed: 1, avatar: (emojiMap[avatar] || '❓') as EmojiKeys });  // Update this line
     }
   });
   return Array.from(statisticsMap.values());
 };
+
 
 interface ChoreStatistics {
   [choreName: string]: {
@@ -99,7 +110,6 @@ const mapChoreStatisticsToDataItems = (
 
   return result;
 };
-
 
 const getHouseholdChoreStatistics = async (householdId: string) => {
   const completedChores = await getCompletedChoresByHousehold(householdId);
