@@ -50,30 +50,29 @@ const mapStatisticsToDataItems = (
 
 const getChoreStatistics = async (
   householdId: string
-): Promise<Array<{ profileId: string; choreId: string; completed: number; avatar: EmojiKeys }>> => {
+): Promise<Array<{ profileId: string; completed: number; avatar: EmojiKeys }>> => {
   const completedChores = await getCompletedChoresByHousehold(householdId);
   const profiles = await getProfiles();
   const profileAvatarMap = Object.fromEntries(profiles.map(profile => [profile.id, profile.avatar]));
 
-  const statisticsMap: Map<string, { profileId: string; choreId: string; completed: number; avatar: EmojiKeys }> = new Map();
+  const statisticsMap: Map<string, { profileId: string; completed: number; avatar: EmojiKeys }> = new Map();
 
   completedChores.forEach((chore) => {
     const profileId = chore.profileId.trim();
-    const choreId = chore.choreId.trim();
-    const key = `${profileId}-${choreId}`;
     const avatar = profileAvatarMap[profileId] as EmojiKeys;
 
-    const existingStat = statisticsMap.get(key);
+    const existingStat = statisticsMap.get(profileId);  // using profileId as the key now
 
     if (existingStat) {
       existingStat.completed++;
     } else {
-      statisticsMap.set(key, { profileId, choreId, completed: 1, avatar });
+      statisticsMap.set(profileId, { profileId, completed: 1, avatar });
     }
   });
 
   return Array.from(statisticsMap.values());
 };
+
 
 //  Code for PieChart for all of the chores in a specific fousehold
 
@@ -139,8 +138,8 @@ const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
 
   React.useEffect(() => {
     async function fetchStatistics() {
-      const choreStats = await getChoreStatistics("Hus 1"); // Put Household ID here
-      const householdChoreStats = await getHouseholdChoreStatistics("Hus 1"); // Put Household ID here
+      const choreStats = await getChoreStatistics(householdId); // Put Household ID here
+      const householdChoreStats = await getHouseholdChoreStatistics(householdId); // Put Household ID here
       setChoreStatistics(choreStats);
       setHouseholdChoreStatistics(householdChoreStats);
     }

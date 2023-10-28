@@ -26,7 +26,7 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
   const theme = useTheme();
 
   const navigateToAddNewChore = () => {
-    navigation.navigate("AddNewChore");
+    navigation.navigate("AddNewChore", { householdId: household.id });
   };
 
   const navigateToChoreDetails = (chore: any) => {
@@ -37,7 +37,6 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
   useFocusEffect(
     React.useCallback(() => {
       async function fetchChores() {
-        console.log("Household did arrive!", household);
         try {
           const choresCollection = collection(database, "chores");
           const choresData: Chore[] = [];

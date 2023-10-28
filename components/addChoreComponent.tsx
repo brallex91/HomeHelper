@@ -4,9 +4,13 @@ import { useDispatch } from "react-redux";
 import { addChore } from "../store/choreSlice";
 import { View } from "react-native";
 import { database } from "../database/firebaseConfig";
-import { addDoc, collection } from "firebase/firestore"; // vet inte varför den inte finns. Men den funkar (addDoc)
+import { addDoc, arrayUnion, collection, doc, updateDoc } from "firebase/firestore"; // vet inte varför den inte finns. Men den funkar (addDoc)
+import { useRoute } from "@react-navigation/native";
+
 
 const AddChoreComponent = () => {
+  const route = useRoute();
+  const { householdId } = route.params;
   const dispatch = useDispatch();
   const [choreData, setChoreData] = useState({
     description: "",
@@ -28,8 +32,15 @@ const AddChoreComponent = () => {
     };
 
     try {
-      await addDoc(collection(database, "chores"), newChore);
-      dispatch(addChore(newChore)); // Detta funkar ändå. dateCreated som gnäller men får ut datum för tillagd chore
+      const choreRef = await addDoc(collection(database, "chores"), newChore);  // Store the ref of the new chore
+      dispatch(addChore(newChore)); 
+
+      // Update the household's chores array to include the new chore's ID
+      const householdRef = doc(database, 'households', householdId);  // Assume your household collection is named 'households'
+      await updateDoc(householdRef, {
+        chores: arrayUnion(choreRef.id)  // Use arrayUnion to add the new chore ID to the chores array
+      });
+      console.log(householdId);
       setChoreData({
         description: "",
         energyLevel: "",
@@ -43,7 +54,7 @@ const AddChoreComponent = () => {
     }
     console.log("Date created:", choreData.dateCreated);
     console.log("Last completed:", choreData.lastCompleted);
-  };
+};
 
   return (
     <View>
