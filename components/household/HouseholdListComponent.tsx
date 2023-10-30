@@ -1,18 +1,37 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { collection, doc, getDoc } from "firebase/firestore";
 import * as React from "react";
 import {
   ScrollView,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { Button, Card, Text, useTheme } from "react-native-paper";
+import { Button, Card, useTheme } from "react-native-paper";
 import { useDispatch } from "react-redux";
+import {
+  CompletedChore,
+  getCompletedChoresByHousehold,
+} from "../../api/completedChores";
+import { getProfiles } from "../../api/profiles";
+import { database } from "../../database/firebaseConfig";
 import { setChoreDetails } from "../../store/choreDetailsSlice";
 import { Chore } from "../../store/choreSlice";
 import { Household } from "../../store/houseHoldSlice";
-import { collection, doc, getDoc } from "firebase/firestore";
-import { database } from "../../database/firebaseConfig";
+
+
+export const emojiMap: Record<string, string> = {
+  fox: "🦊",
+  pig: "🐷",
+  frog: "🐸",
+  chick: "🐥",
+  octopus: "🐙",
+  dolphin: "🐬",
+  owl: "🦉",
+  unicorn: "🦄",
+};
+
 
 interface HouseholdListComponentProps {
   household: Household;
@@ -23,21 +42,16 @@ export default function HouseholdListComponent({
 }: HouseholdListComponentProps) {
   const dispatch = useDispatch();
   const [chores, setChores] = React.useState<Chore[]>([]);
+  const [completedChores, setCompletedChores] = React.useState<
+    CompletedChore[]
+  >([]);
+  const [profiles, setProfiles] = React.useState<Profile[]>([]);
   const navigation = useNavigation();
   const theme = useTheme();
 
-  const navigateToAddNewChore = () => {
-    navigation.navigate("AddNewChore", { householdId: household.id });
-  };
-
-  const navigateToChoreDetails = (chore: any) => {
-    dispatch(setChoreDetails(chore));
-    navigation.navigate("ChoreDetails");
-  };
-
   useFocusEffect(
     React.useCallback(() => {
-      async function fetchChores() {
+      async function fetchData() {
         try {
           const choresCollection = collection(database, "chores");
           const choresData: Chore[] = [];
@@ -52,14 +66,17 @@ export default function HouseholdListComponent({
           }
 
           setChores(choresData);
+          const fetchedCompletedChores = await getCompletedChoresByHousehold(
+            household.id
+          );
+          setCompletedChores(fetchedCompletedChores);
+          const fetchedProfiles = await getProfiles();
+          setProfiles(fetchedProfiles);
         } catch (error) {
-          console.error("Error fetching chores:", error);
+          console.error("Error fetching data:", error);
         }
       }
 
-      fetchChores();
-    }, [household.chores])
-  );
 
   const getDaysLeftToDoChore = (lastCompleted: Date, frequency: number) => {
     const nextDueDate = new Date(lastCompleted);
@@ -72,6 +89,21 @@ export default function HouseholdListComponent({
     const daysLeft = timeDifference / (1000 * 60 * 60 * 24);
     return Math.ceil(daysLeft);
   };
+
+
+  const getAvatarsForChore = (choreId: string): string => {
+    return completedChores
+      .filter((c) => c.choreId === choreId)
+      .map((c) => {
+        const profile = profiles.find((p) => p.id === c.profileId);
+        // Här använder vi emojiMap för att omvandla text till en emoji
+        return profile && emojiMap[profile.avatar as keyof typeof emojiMap]
+          ? emojiMap[profile.avatar as keyof typeof emojiMap]
+          : "❓";
+      })
+      .join(" ");
+  };
+
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
@@ -103,14 +135,24 @@ export default function HouseholdListComponent({
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {chores.map((chore) => {
+
+          const validLastCompletedDate = chore.lastCompleted
+            ? chore.lastCompleted
+            : "";
+          const daysLeft = validLastCompletedDate
+            ? getDaysLeftToDoChore(
+                validLastCompletedDate.toString(),
+
           const validLastCompletedDate = chore.lastCompleted;
           const daysLeft = validLastCompletedDate
             ? getDaysLeftToDoChore(
                 new Date(validLastCompletedDate),
+
                 chore.frequency
               )
             : null;
           const isOverdue = daysLeft !== null && daysLeft <= 0;
+          const avatars = getAvatarsForChore(chore.id);
 
           return (
             <TouchableWithoutFeedback
@@ -120,6 +162,15 @@ export default function HouseholdListComponent({
               <Card style={styles.card}>
                 <Card.Title
                   title={chore.name}
+
+                  left={(props) => (
+                    <Text style={isOverdue ? { color: "red" } : {}}>
+                      {isOverdue ? ` ${Math.abs(daysLeft)} ` : `${daysLeft} `}
+                    </Text>
+                  )}
+                  right={(props) => (
+                    <Text style={styles.userIcons}>{avatars}</Text>
+
                   right={(props) => (
                     <>
                       <View style={styles.dueDateContainer}>
@@ -140,6 +191,7 @@ export default function HouseholdListComponent({
                         <Text style={styles.userIcons}>🐷</Text>
                       </View>
                     </>
+
                   )}
                 />
               </Card>
@@ -163,6 +215,8 @@ const styles = StyleSheet.create({
   },
   userIcons: {
     paddingRight: 20,
+    fontSize: 28,
+    letterSpacing: -6,
   },
   buttonBar: {
     flexDirection: "row",

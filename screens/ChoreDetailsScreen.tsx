@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import {
-  Text,
-  TextInput,
-  Button,
-  useTheme,
-  Card,
-  Checkbox,
-} from "react-native-paper";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
-import { updateChoreDetails } from "../store/choreDetailsSlice";
-import { useDispatch } from "react-redux";
-import NumberSelectionModal from "../components/NumberSelectionModal";
-import { doc, setDoc } from "firebase/firestore";
-import { database } from "../database/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
+import { doc, setDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Button, Card, Text, TextInput, useTheme } from "react-native-paper";
+import { useDispatch, useSelector } from "react-redux";
+import NumberSelectionModal from "../components/NumberSelectionModal";
+import { database } from "../database/firebaseConfig";
+import { updateChoreDetails } from "../store/choreDetailsSlice";
+import { RootState } from "../store/store";
 
 const ChoreDetailsScreen = () => {
   const navigation = useNavigation();
@@ -46,16 +38,16 @@ const ChoreDetailsScreen = () => {
     if (!chore) {
       return;
     }
-  
+
     const updatedChore = {
       ...chore,
       name: newName,
       description: newDescription,
       frequency: newFrequency,
       energyLevel: newEnergyLevel,
-      lastCompleted: new Date().toISOString() // Always update lastCompleted
+      lastCompleted: new Date().toString(),
     };
-  
+
     try {
       const choreRef = doc(database, "chores", chore.id);
       await setDoc(choreRef, updatedChore);
@@ -172,19 +164,6 @@ const ChoreDetailsScreen = () => {
               Save
             </Button>
           </View>
-          {/* <View style={styles.checkbox}>
-            <Card style={styles.card}>
-
-            <Checkbox.Item
-              label="Marked as finished"
-              status={lastCompletedChore ? "checked" : "unchecked"}
-              color="green"
-              onPress={() => {
-                setLastCompletedChore(!lastCompletedChore);
-              }}
-              />
-              </Card>
-          </View> */}
         </View>
       </ScrollView>
 

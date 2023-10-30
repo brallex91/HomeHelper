@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { database } from "../database/firebaseConfig";
 
 export interface CompletedChore {
@@ -29,4 +29,16 @@ export async function getCompletedChoresByHousehold(
   });
 
   return completedChores;
+}
+
+export async function createCompletedChore(completedChore: CompletedChore) {
+  try {
+    const docRef = await addDoc(
+      collection(database, "completedChores"),
+      completedChore
+    );
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
 }
