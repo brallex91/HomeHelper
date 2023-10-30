@@ -20,6 +20,7 @@ import { setChoreDetails } from "../../store/choreDetailsSlice";
 import { Chore } from "../../store/choreSlice";
 import { Household } from "../../store/houseHoldSlice";
 
+
 export const emojiMap: Record<string, string> = {
   fox: "🦊",
   pig: "🐷",
@@ -30,6 +31,7 @@ export const emojiMap: Record<string, string> = {
   owl: "🦉",
   unicorn: "🦄",
 };
+
 
 interface HouseholdListComponentProps {
   household: Household;
@@ -75,27 +77,19 @@ export default function HouseholdListComponent({
         }
       }
 
-      fetchData();
-    }, [household.chores, household.id])
-  );
 
-  const navigateToAddNewChore = () => {
-    navigation.navigate("AddNewChore", { householdId: household.id });
-  };
-
-  const navigateToChoreDetails = (chore: Chore) => {
-    dispatch(setChoreDetails(chore));
-    navigation.navigate("ChoreDetails");
-  };
-
-  const getDaysLeftToDoChore = (lastCompleted: string, interval: number) => {
+  const getDaysLeftToDoChore = (lastCompleted: Date, frequency: number) => {
     const nextDueDate = new Date(lastCompleted);
-    nextDueDate.setDate(nextDueDate.getDate() + interval);
+    nextDueDate.setTime(
+      lastCompleted.getTime() + frequency * 24 * 60 * 60 * 1000
+    );
+
     const dateNow = new Date();
     const timeDifference = nextDueDate.getTime() - dateNow.getTime();
     const daysLeft = timeDifference / (1000 * 60 * 60 * 24);
     return Math.ceil(daysLeft);
   };
+
 
   const getAvatarsForChore = (choreId: string): string => {
     return completedChores
@@ -109,6 +103,7 @@ export default function HouseholdListComponent({
       })
       .join(" ");
   };
+
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
@@ -140,12 +135,19 @@ export default function HouseholdListComponent({
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {chores.map((chore) => {
+
           const validLastCompletedDate = chore.lastCompleted
             ? chore.lastCompleted
             : "";
           const daysLeft = validLastCompletedDate
             ? getDaysLeftToDoChore(
                 validLastCompletedDate.toString(),
+
+          const validLastCompletedDate = chore.lastCompleted;
+          const daysLeft = validLastCompletedDate
+            ? getDaysLeftToDoChore(
+                new Date(validLastCompletedDate),
+
                 chore.frequency
               )
             : null;
@@ -160,6 +162,7 @@ export default function HouseholdListComponent({
               <Card style={styles.card}>
                 <Card.Title
                   title={chore.name}
+
                   left={(props) => (
                     <Text style={isOverdue ? { color: "red" } : {}}>
                       {isOverdue ? ` ${Math.abs(daysLeft)} ` : `${daysLeft} `}
@@ -167,6 +170,28 @@ export default function HouseholdListComponent({
                   )}
                   right={(props) => (
                     <Text style={styles.userIcons}>{avatars}</Text>
+
+                  right={(props) => (
+                    <>
+                      <View style={styles.dueDateContainer}>
+                        <View
+                          style={[
+                            styles.circle,
+                            {
+                              backgroundColor: isOverdue ? "red" : "lightgrey",
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={{ color: isOverdue ? "white" : "black" }}
+                          >
+                            {isOverdue ? Math.abs(daysLeft) : daysLeft}
+                          </Text>
+                        </View>
+                        <Text style={styles.userIcons}>🐷</Text>
+                      </View>
+                    </>
+
                   )}
                 />
               </Card>
@@ -209,5 +234,17 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     padding: 8,
+  },
+  dueDateContainer: {
+    flexDirection: "row",
+    paddingRight: 5,
+  },
+  circle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
   },
 });

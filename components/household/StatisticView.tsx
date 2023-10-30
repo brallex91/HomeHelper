@@ -54,19 +54,22 @@ const getChoreStatistics = async (
   const completedChores = await getCompletedChoresByHousehold(householdId);
   const profiles = await getProfiles();
   const profileAvatarMap = Object.fromEntries(profiles.map(profile => [profile.id, profile.avatar]));
+  const chores = await getChores();
 
   const statisticsMap: Map<string, { profileId: string; completed: number; avatar: EmojiKeys }> = new Map();
+  const choreIdMap = Object.fromEntries(chores.map(chore => [chore.id, chore]));
 
   completedChores.forEach((chore) => {
     const profileId = chore.profileId.trim();
     const avatar = profileAvatarMap[profileId] as EmojiKeys;
+    const energy = choreIdMap[chore.choreId]?.energyLevel || 0;
 
     const existingStat = statisticsMap.get(profileId);  // using profileId as the key now
 
     if (existingStat) {
       existingStat.completed++;
     } else {
-      statisticsMap.set(profileId, { profileId, completed: 1, avatar });
+      statisticsMap.set(profileId, { profileId, completed: 1 + energy, avatar });
     }
   });
 
@@ -117,6 +120,7 @@ const getHouseholdChoreStatistics = async (householdId: string) => {
     const profile = profileIdMap[profileId];
     const profileName = profile?.name || 'Unknown Profile';
     const avatar = (profile?.avatar || '❓') as EmojiKeys; 
+    const energy = choreIdMap[chore.choreId]?.energyLevel || 0;
 
     if (!statistics[choreName]) {
       statistics[choreName] = {};
@@ -126,11 +130,12 @@ const getHouseholdChoreStatistics = async (householdId: string) => {
       statistics[choreName][profileName] = { count: 0, avatar };
     }
 
-    statistics[choreName][profileName].count++;
+    statistics[choreName][profileName].count += 1 + energy;  // Increment count by 1 plus the energyLevel
   });
 
   return statistics;
 };
+
 
 const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
   const [choreStatistics, setChoreStatistics] = React.useState<Array<{ profileId: string; completed: number; avatar: EmojiKeys }>>([]);

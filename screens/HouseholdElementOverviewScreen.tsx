@@ -1,17 +1,11 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableWithoutFeedback, TextInput } from 'react-native'; 
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Card, Button } from 'react-native-paper';
-import { auth } from '../database/firebaseConfig';
+import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Card } from 'react-native-paper';
 import { updateApiHousehold } from '../api/household';
 import { getProfiles } from '../api/profiles';
-import { Household } from '../store/houseHoldSlice';
-
-type RootStackParamList = {
-  HouseholdElementOverviewScreen: { household: Household };
-};
-
-type HouseholdElementOverviewScreenRouteProp = RouteProp<RootStackParamList, 'HouseholdElementOverviewScreen'>;
+import { auth } from '../database/firebaseConfig';
+import { RootStackParamList } from '../navigation/RootNavigator';
 
 export type EmojiKeys = 'fox' | 'pig' | 'frog' | 'chick' | 'octopus' | 'dolphin' | 'owl' | 'unicorn';
 
@@ -26,9 +20,9 @@ export const emojiMap: Record<EmojiKeys, string> = {
   unicorn: '🦄'
 };
 
-export default function HouseholdElementOverviewScreen () {
-  const route = useRoute<HouseholdElementOverviewScreenRouteProp>();
-  const navigation = useNavigation();
+type Props = NativeStackScreenProps<RootStackParamList, 'HouseholdElementOverviewScreen'>
+
+export default function HouseholdElementOverviewScreen ({ navigation, route}: Props) {
   const { household } = route.params;
   const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
   const userID = auth.currentUser?.uid || userMockUID;
