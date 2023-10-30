@@ -14,12 +14,13 @@ import { Household } from "../../store/houseHoldSlice";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { database } from "../../database/firebaseConfig";
 
-
 interface HouseholdListComponentProps {
   household: Household;
 }
 
-export default function HouseholdListComponent({ household }: HouseholdListComponentProps) {
+export default function HouseholdListComponent({
+  household,
+}: HouseholdListComponentProps) {
   const dispatch = useDispatch();
   const [chores, setChores] = React.useState<Chore[]>([]);
   const navigation = useNavigation();
@@ -58,28 +59,19 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
 
       fetchChores();
     }, [household.chores])
-);
+  );
 
-  
-  const getDaysLeftToDoChore = (lastCompleted: Date, interval: number) => {
-    // Skapar en ny datumobjekt baserat på när uppgiften senast utfördes.
+  const getDaysLeftToDoChore = (lastCompleted: Date, frequency: number) => {
     const nextDueDate = new Date(lastCompleted);
-    
-    // Lägger till intervallet (i dagar) till det senaste utförda datumet för att få nästa datum då uppgiften ska utföras.
-    nextDueDate.setDate(lastCompleted.getDate() + interval);
-    
-    // Skapar ett nytt datumobjekt för nuvarande tidpunkt.
+    nextDueDate.setTime(
+      lastCompleted.getTime() + frequency * 24 * 60 * 60 * 1000
+    );
+
     const dateNow = new Date();
-    
-    // Räknar ut tidsdifferensen (i millisekunder) mellan nästa utförda datum och nuvarande tidpunkt.
     const timeDifference = nextDueDate.getTime() - dateNow.getTime();
-    
-    // Omvandlar tidsdifferensen från millisekunder till dagar.
     const daysLeft = timeDifference / (1000 * 60 * 60 * 24);
-    
-    // Returnerar tidsdifferensen avrundad uppåt (eftersom vi vill ha hela dagar).
     return Math.ceil(daysLeft);
-};
+  };
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
@@ -112,7 +104,12 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {chores.map((chore) => {
           const validLastCompletedDate = chore.lastCompleted;
-          const daysLeft = validLastCompletedDate ? getDaysLeftToDoChore(new Date(validLastCompletedDate),chore.frequency): null;
+          const daysLeft = validLastCompletedDate
+            ? getDaysLeftToDoChore(
+                new Date(validLastCompletedDate),
+                chore.frequency
+              )
+            : null;
           const isOverdue = daysLeft !== null && daysLeft <= 0;
 
           return (
@@ -123,14 +120,27 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
               <Card style={styles.card}>
                 <Card.Title
                   title={chore.name}
-                  left={(props) => (
+                  right={(props) => (
                     <>
-                      <Text style={isOverdue ? { color: "red" } : {}}>
-                        {isOverdue ? ` ${Math.abs(daysLeft)} ` : `${daysLeft} `}
-                      </Text>
+                      <View style={styles.dueDateContainer}>
+                        <View
+                          style={[
+                            styles.circle,
+                            {
+                              backgroundColor: isOverdue ? "red" : "lightgrey",
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={{ color: isOverdue ? "white" : "black" }}
+                          >
+                            {isOverdue ? Math.abs(daysLeft) : daysLeft}
+                          </Text>
+                        </View>
+                        <Text style={styles.userIcons}>🐷</Text>
+                      </View>
                     </>
                   )}
-                  right={(props) => <Text style={styles.userIcons}>🐷</Text>}
                 />
               </Card>
             </TouchableWithoutFeedback>
@@ -170,5 +180,17 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     padding: 8,
+  },
+  dueDateContainer: {
+    flexDirection: "row",
+    paddingRight: 5,
+  },
+  circle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
   },
 });
