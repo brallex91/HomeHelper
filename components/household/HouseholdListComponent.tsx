@@ -19,7 +19,7 @@ import { database } from "../../database/firebaseConfig";
 import { setChoreDetails } from "../../store/choreDetailsSlice";
 import { Chore } from "../../store/choreSlice";
 import { Household } from "../../store/houseHoldSlice";
-
+import { Profile } from "../../store/profileSlice";
 
 export const emojiMap: Record<string, string> = {
   fox: "🦊",
@@ -31,7 +31,6 @@ export const emojiMap: Record<string, string> = {
   owl: "🦉",
   unicorn: "🦄",
 };
-
 
 interface HouseholdListComponentProps {
   household: Household;
@@ -52,51 +51,47 @@ export default function HouseholdListComponent({
   useFocusEffect(
     React.useCallback(() => {
       async function fetchData() {
-        try {
-          const choresCollection = collection(database, "chores");
-          const choresData: Chore[] = [];
+        const choresCollection = collection(database, "chores");
+        const choresData: Chore[] = [];
 
-          for (const choreId of household.chores) {
-            const choreRef = doc(choresCollection, choreId);
-            const choreDoc = await getDoc(choreRef);
-            if (choreDoc.exists()) {
-              const chore = { id: choreDoc.id, ...choreDoc.data() } as Chore;
-              choresData.push(chore);
-            }
+        for (const choreId of household.chores) {
+          const choreRef = doc(choresCollection, choreId);
+          const choreDoc = await getDoc(choreRef);
+          if (choreDoc.exists()) {
+            const chore = { id: choreDoc.id, ...choreDoc.data() } as Chore;
+            choresData.push(chore);
           }
-
-          setChores(choresData);
-          const fetchedCompletedChores = await getCompletedChoresByHousehold(
-            household.id
-          );
-          setCompletedChores(fetchedCompletedChores);
-          const fetchedProfiles = await getProfiles();
-          setProfiles(fetchedProfiles);
-        } catch (error) {
-          console.error("Error fetching data:", error);
         }
+
+        setChores(choresData);
+        const fetchedCompletedChores = await getCompletedChoresByHousehold(
+          household.id
+        );
+        setCompletedChores(fetchedCompletedChores);
+        const fetchedProfiles = await getProfiles();
+        setProfiles(fetchedProfiles);
       }
 
+      fetchData();
+    }, [household.chores])
+  );
 
   const getDaysLeftToDoChore = (lastCompleted: Date, frequency: number) => {
     const nextDueDate = new Date(lastCompleted);
     nextDueDate.setTime(
       lastCompleted.getTime() + frequency * 24 * 60 * 60 * 1000
     );
-
     const dateNow = new Date();
     const timeDifference = nextDueDate.getTime() - dateNow.getTime();
     const daysLeft = timeDifference / (1000 * 60 * 60 * 24);
     return Math.ceil(daysLeft);
   };
 
-
   const getAvatarsForChore = (choreId: string): string => {
     return completedChores
       .filter((c) => c.choreId === choreId)
       .map((c) => {
         const profile = profiles.find((p) => p.id === c.profileId);
-        // Här använder vi emojiMap för att omvandla text till en emoji
         return profile && emojiMap[profile.avatar as keyof typeof emojiMap]
           ? emojiMap[profile.avatar as keyof typeof emojiMap]
           : "❓";
@@ -104,13 +99,20 @@ export default function HouseholdListComponent({
       .join(" ");
   };
 
+  const navigateToAddNewChore = () => {
+    navigation.navigate("AddNewChore", { householdId: household.id });
+  };
+
+  const navigateToChoreDetails = (chore: Chore) => {
+    dispatch(setChoreDetails(chore));
+    navigation.navigate("ChoreDetails");
+  };
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
       <Button
         icon="plus-circle-outline"
         mode="contained"
-        buttonColor={theme.colors.primary}
         onPress={navigateToAddNewChore}
         style={styles.button}
         labelStyle={styles.buttonLabel}
@@ -135,19 +137,9 @@ export default function HouseholdListComponent({
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {chores.map((chore) => {
-
-          const validLastCompletedDate = chore.lastCompleted
-            ? chore.lastCompleted
-            : "";
-          const daysLeft = validLastCompletedDate
+          const daysLeft = chore.lastCompleted
             ? getDaysLeftToDoChore(
-                validLastCompletedDate.toString(),
-
-          const validLastCompletedDate = chore.lastCompleted;
-          const daysLeft = validLastCompletedDate
-            ? getDaysLeftToDoChore(
-                new Date(validLastCompletedDate),
-
+                new Date(chore.lastCompleted),
                 chore.frequency
               )
             : null;
@@ -162,36 +154,20 @@ export default function HouseholdListComponent({
               <Card style={styles.card}>
                 <Card.Title
                   title={chore.name}
-
-                  left={(props) => (
-                    <Text style={isOverdue ? { color: "red" } : {}}>
-                      {isOverdue ? ` ${Math.abs(daysLeft)} ` : `${daysLeft} `}
-                    </Text>
-                  )}
                   right={(props) => (
-                    <Text style={styles.userIcons}>{avatars}</Text>
-
-                  right={(props) => (
-                    <>
-                      <View style={styles.dueDateContainer}>
-                        <View
-                          style={[
-                            styles.circle,
-                            {
-                              backgroundColor: isOverdue ? "red" : "lightgrey",
-                            },
-                          ]}
-                        >
-                          <Text
-                            style={{ color: isOverdue ? "white" : "black" }}
-                          >
-                            {isOverdue ? Math.abs(daysLeft) : daysLeft}
-                          </Text>
-                        </View>
-                        <Text style={styles.userIcons}>🐷</Text>
+                    <View style={styles.dueDateContainer}>
+                      <View
+                        style={[
+                          styles.circle,
+                          { backgroundColor: isOverdue ? "red" : "lightgrey" },
+                        ]}
+                      >
+                        <Text style={{ color: isOverdue ? "white" : "black" }}>
+                          {isOverdue ? Math.abs(daysLeft) : daysLeft}
+                        </Text>
                       </View>
-                    </>
-
+                      <Text style={styles.userIcons}>{avatars}</Text>
+                    </View>
                   )}
                 />
               </Card>
@@ -199,7 +175,6 @@ export default function HouseholdListComponent({
           );
         })}
       </ScrollView>
-
       <BottomButtonBar />
     </View>
   );
