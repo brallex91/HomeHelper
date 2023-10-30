@@ -3,6 +3,7 @@ import React from 'react';
 import AddChoreScreen from '../screens/AddChoreScreen';
 import AddNewHousehold from '../screens/AddHouseholdScreen';
 import ChoreDetailsScreen from '../screens/ChoreDetailsScreen';
+import CreateProfileComponent from '../screens/CreateProfileScreen';
 import HouseholdChoreScreen from '../screens/HouseholdChoreScreen';
 import HouseholdElementOverviewScreen from '../screens/HouseholdElementOverviewScreen';
 import HouseholdOverviewScreen from '../screens/HouseholdOverviewScreen';
@@ -28,7 +29,7 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <RootStack.Navigator initialRouteName='HouseholdChores'>
+    <RootStack.Navigator initialRouteName='CreateProfile'>
       <RootStack.Screen
         name='HouseholdChores'
         component={HouseholdChoreScreen}
@@ -41,6 +42,14 @@ export default function RootNavigator() {
         component={WelcomeScreen}
         options={{
           headerTitleAlign: 'center',
+        }}
+      />
+      <RootStack.Screen
+        name='CreateProfile'
+        component={CreateProfileComponent}
+        options={{
+          headerTitleAlign: 'center',
+          title: 'Skapa Profil'
         }}
       />
       <RootStack.Screen

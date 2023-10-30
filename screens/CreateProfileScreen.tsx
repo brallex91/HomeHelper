@@ -34,7 +34,30 @@ const getColorForEmoji = (emoji?: Emoji) => {
   }
 };
 
-const EmojiSelector = () => {
+const convertEmojiToString = (emoji: string) => {
+  switch (emoji) {
+    case "🦊":
+      return "fox";
+    case "🐷":
+      return "pig";
+    case "🐸":
+      return "frog";
+    case "🐥":
+      return "chick";
+    case "🐙":
+      return "octopus";
+    case "🐬":
+      return "dolphin";
+    case "🦉":
+      return "owl";
+    case "🦄":
+      return "unicorn";
+    default:
+      return "";
+  }
+};
+
+const CreateProfileComponent = () => {
   const theme = useTheme();
   const navigation = useNavigation();
   const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
@@ -55,9 +78,10 @@ const EmojiSelector = () => {
   };
 
   const handleButtonPress = async () => {
-     addProfile(profileData);
-     navigation.navigate("HouseholdChores");
-  };
+    const avatarString = convertEmojiToString(profileData.avatar);
+    await addProfile({ ...profileData, avatar: avatarString });
+    navigation.navigate("HouseholdChores");
+  };  
   
   const renderEmojis = () => {
     return emojis.map((emoji, index) => (
@@ -128,4 +152,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default EmojiSelector;
+export default CreateProfileComponent;
