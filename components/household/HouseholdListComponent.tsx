@@ -1,42 +1,55 @@
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { collection, doc, getDoc } from "firebase/firestore";
 import * as React from "react";
 import {
   ScrollView,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { Button, Card, Text, useTheme } from "react-native-paper";
+import { Button, Card, useTheme } from "react-native-paper";
 import { useDispatch } from "react-redux";
+import {
+  CompletedChore,
+  getCompletedChoresByHousehold,
+} from "../../api/completedChores";
+import { getProfiles } from "../../api/profiles";
+import { database } from "../../database/firebaseConfig";
 import { setChoreDetails } from "../../store/choreDetailsSlice";
 import { Chore } from "../../store/choreSlice";
 import { Household } from "../../store/houseHoldSlice";
-import { collection, doc, getDoc } from "firebase/firestore";
-import { database } from "../../database/firebaseConfig";
 
+export const emojiMap: Record<string, string> = {
+  fox: "🦊",
+  pig: "🐷",
+  frog: "🐸",
+  chick: "🐥",
+  octopus: "🐙",
+  dolphin: "🐬",
+  owl: "🦉",
+  unicorn: "🦄",
+};
 
 interface HouseholdListComponentProps {
   household: Household;
 }
 
-export default function HouseholdListComponent({ household }: HouseholdListComponentProps) {
+export default function HouseholdListComponent({
+  household,
+}: HouseholdListComponentProps) {
   const dispatch = useDispatch();
   const [chores, setChores] = React.useState<Chore[]>([]);
+  const [completedChores, setCompletedChores] = React.useState<
+    CompletedChore[]
+  >([]);
+  const [profiles, setProfiles] = React.useState<Profile[]>([]);
   const navigation = useNavigation();
   const theme = useTheme();
 
-  const navigateToAddNewChore = () => {
-    navigation.navigate("AddNewChore", { householdId: household.id });
-  };
-
-  const navigateToChoreDetails = (chore: any) => {
-    dispatch(setChoreDetails(chore));
-    navigation.navigate("ChoreDetails");
-  };
-
   useFocusEffect(
     React.useCallback(() => {
-      async function fetchChores() {
+      async function fetchData() {
         try {
           const choresCollection = collection(database, "chores");
           const choresData: Chore[] = [];
@@ -51,35 +64,51 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
           }
 
           setChores(choresData);
+          const fetchedCompletedChores = await getCompletedChoresByHousehold(
+            household.id
+          );
+          setCompletedChores(fetchedCompletedChores);
+          const fetchedProfiles = await getProfiles();
+          setProfiles(fetchedProfiles);
         } catch (error) {
-          console.error("Error fetching chores:", error);
+          console.error("Error fetching data:", error);
         }
       }
 
-      fetchChores();
-    }, [household.chores])
-);
+      fetchData();
+    }, [household.chores, household.id])
+  );
 
-  
-  const getDaysLeftToDoChore = (lastCompleted: Date, interval: number) => {
-    // Skapar en ny datumobjekt baserat på när uppgiften senast utfördes.
+  const navigateToAddNewChore = () => {
+    navigation.navigate("AddNewChore", { householdId: household.id });
+  };
+
+  const navigateToChoreDetails = (chore: Chore) => {
+    dispatch(setChoreDetails(chore));
+    navigation.navigate("ChoreDetails");
+  };
+
+  const getDaysLeftToDoChore = (lastCompleted: string, interval: number) => {
     const nextDueDate = new Date(lastCompleted);
-    
-    // Lägger till intervallet (i dagar) till det senaste utförda datumet för att få nästa datum då uppgiften ska utföras.
-    nextDueDate.setDate(lastCompleted.getDate() + interval);
-    
-    // Skapar ett nytt datumobjekt för nuvarande tidpunkt.
+    nextDueDate.setDate(nextDueDate.getDate() + interval);
     const dateNow = new Date();
-    
-    // Räknar ut tidsdifferensen (i millisekunder) mellan nästa utförda datum och nuvarande tidpunkt.
     const timeDifference = nextDueDate.getTime() - dateNow.getTime();
-    
-    // Omvandlar tidsdifferensen från millisekunder till dagar.
     const daysLeft = timeDifference / (1000 * 60 * 60 * 24);
-    
-    // Returnerar tidsdifferensen avrundad uppåt (eftersom vi vill ha hela dagar).
     return Math.ceil(daysLeft);
-};
+  };
+
+  const getAvatarsForChore = (choreId: string): string => {
+    return completedChores
+      .filter((c) => c.choreId === choreId)
+      .map((c) => {
+        const profile = profiles.find((p) => p.id === c.profileId);
+        // Här använder vi emojiMap för att omvandla text till en emoji
+        return profile && emojiMap[profile.avatar as keyof typeof emojiMap]
+          ? emojiMap[profile.avatar as keyof typeof emojiMap]
+          : "❓";
+      })
+      .join(" ");
+  };
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
@@ -111,9 +140,17 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {chores.map((chore) => {
-          const validLastCompletedDate = chore.lastCompleted;
-          const daysLeft = validLastCompletedDate ? getDaysLeftToDoChore(new Date(validLastCompletedDate),chore.frequency): null;
+          const validLastCompletedDate = chore.lastCompleted
+            ? chore.lastCompleted
+            : "";
+          const daysLeft = validLastCompletedDate
+            ? getDaysLeftToDoChore(
+                validLastCompletedDate.toString(),
+                chore.frequency
+              )
+            : null;
           const isOverdue = daysLeft !== null && daysLeft <= 0;
+          const avatars = getAvatarsForChore(chore.id);
 
           return (
             <TouchableWithoutFeedback
@@ -124,13 +161,13 @@ export default function HouseholdListComponent({ household }: HouseholdListCompo
                 <Card.Title
                   title={chore.name}
                   left={(props) => (
-                    <>
-                      <Text style={isOverdue ? { color: "red" } : {}}>
-                        {isOverdue ? ` ${Math.abs(daysLeft)} ` : `${daysLeft} `}
-                      </Text>
-                    </>
+                    <Text style={isOverdue ? { color: "red" } : {}}>
+                      {isOverdue ? ` ${Math.abs(daysLeft)} ` : `${daysLeft} `}
+                    </Text>
                   )}
-                  right={(props) => <Text style={styles.userIcons}>🐷</Text>}
+                  right={(props) => (
+                    <Text style={styles.userIcons}>{avatars}</Text>
+                  )}
                 />
               </Card>
             </TouchableWithoutFeedback>
@@ -153,6 +190,8 @@ const styles = StyleSheet.create({
   },
   userIcons: {
     paddingRight: 20,
+    fontSize: 28,
+    letterSpacing: -6,
   },
   buttonBar: {
     flexDirection: "row",
