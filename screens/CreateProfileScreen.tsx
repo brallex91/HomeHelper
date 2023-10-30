@@ -1,9 +1,10 @@
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { addProfile } from "../api/profiles";
-import { auth } from "../database/firebaseConfig";
+import { auth, database } from "../database/firebaseConfig";
 import { ProfileCreate } from "../store/profileSlice";
 
 const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
@@ -59,6 +60,9 @@ const convertEmojiToString = (emoji: string) => {
 
 const CreateProfileComponent = () => {
   const theme = useTheme();
+  const route = useRoute();
+  const { householdId } = route.params;
+  // const householdId = "SgMkalsLTII3Sum8HZFe";
   const navigation = useNavigation();
   const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
   const [profileData, setProfileData] = useState<ProfileCreate>({
@@ -79,8 +83,13 @@ const CreateProfileComponent = () => {
 
   const handleButtonPress = async () => {
     const avatarString = convertEmojiToString(profileData.avatar);
-    await addProfile({ ...profileData, avatar: avatarString });
-    navigation.navigate("HouseholdChores");
+    const profileDoc = await addProfile({ ...profileData, avatar: avatarString });
+    // Update the household's chores array to include the new chore's ID
+    const householdRef = doc(database, 'households', householdId);  // Assume your household collection is named 'households'
+    await updateDoc(householdRef, {
+      members: arrayUnion(profileDoc.id)  // Use arrayUnion to add the new chore ID to the chores array
+    });
+    navigation.navigate("HouseholdChores",  { householdId: household.id });
   };  
   
   const renderEmojis = () => {
