@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableWithoutFeedback, TextInput } from 'react-native'; 
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { Card, Button } from 'react-native-paper';
-import { auth } from '../database/firebaseConfig';
+import React from 'react';
+import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Card } from 'react-native-paper';
 import { updateApiHousehold } from '../api/household';
 import { getProfiles } from '../api/profiles';
+import { auth } from '../database/firebaseConfig';
 import { Household } from '../store/houseHoldSlice';
 
 type RootStackParamList = {

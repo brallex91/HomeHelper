@@ -56,7 +56,7 @@ export default function HouseholdOverviewScreen() {
 
       if (household) {
         console.log('Hushåll hittat!!!');
-        navigation.navigate('CreateProfileScreen', { household});
+        navigation.navigate('CreateProfileScreen', { householdId: household.id });
       } else {
         setError('Hushåll ej hittat');
       }
