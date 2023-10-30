@@ -22,14 +22,14 @@ export type RootStackParamList = {
   AddNewHousehold: undefined;
   HouseholdElementOverviewScreen: { household: Household };
   ChoreDetails: undefined;
-  CreateProfile: undefined;
+  CreateProfileScreen: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <RootStack.Navigator initialRouteName='CreateProfile'>
+    <RootStack.Navigator initialRouteName='Login'>
       <RootStack.Screen
         name='HouseholdChores'
         component={HouseholdChoreScreen}
@@ -45,7 +45,7 @@ export default function RootNavigator() {
         }}
       />
       <RootStack.Screen
-        name='CreateProfile'
+        name='CreateProfileScreen'
         component={CreateProfileComponent}
         options={{
           headerTitleAlign: 'center',

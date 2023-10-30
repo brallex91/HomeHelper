@@ -62,7 +62,6 @@ const CreateProfileComponent = () => {
   const theme = useTheme();
   const route = useRoute();
   const { householdId } = route.params;
-  // const householdId = "SgMkalsLTII3Sum8HZFe";
   const navigation = useNavigation();
   const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
   const [profileData, setProfileData] = useState<ProfileCreate>({
