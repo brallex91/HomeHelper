@@ -12,6 +12,7 @@ import {
 import { Button, Card, useTheme } from 'react-native-paper';
 import { getHouseholdByCode, getHouseholds } from '../api/household';
 import { auth } from '../database/firebaseConfig';
+import { Household } from '../store/houseHoldSlice';
 
 export default function HouseholdOverviewScreen() {
   const [households, setHouseholds] = useState<Household[]>([]);
@@ -19,6 +20,7 @@ export default function HouseholdOverviewScreen() {
   const [error, setError] = useState('');
   const [isJoiningHousehold, setIsJoiningHousehold] = useState(false);
   const navigation = useNavigation();
+  
   const navigateToHouseholdElementOverview = (household: Household) => {
     navigation.navigate('HouseholdElementOverviewScreen', { household });
   };
@@ -54,7 +56,7 @@ export default function HouseholdOverviewScreen() {
 
       if (household) {
         console.log('Hushåll hittat!!!');
-        navigation.navigate('CreateProfileScreen', { householdCode });
+        navigation.navigate('CreateProfileScreen', { household});
       } else {
         setError('Hushåll ej hittat');
       }
