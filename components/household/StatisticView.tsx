@@ -3,14 +3,15 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 import { getCompletedChoresByHousehold } from "../../api/completedChores";
 import StatisticComponent from "./StatisticComponent";
+import { getProfiles } from "../../api/profiles";
+import { getChores } from "../../api/chores";
+import { EmojiKeys, emojiMap } from "../../screens/HouseholdElementOverviewScreen";
 
 interface DataItem {
   number: number;
   emoji: string;
   color: string;
 }
-
-const emojis: string[] = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"];
 
 const getColorForEmoji = (emoji: string) => {
   switch (emoji) {
@@ -35,66 +36,123 @@ const getColorForEmoji = (emoji: string) => {
   }
 };
 
+// Code for PieChart of Total statistics of a specific household
+
 const mapStatisticsToDataItems = (
-  statistics: Array<{ profileId: string; choreId: string; completed: number }>
+  statistics: Array<{ profileId: string; completed: number; avatar: EmojiKeys }>
 ): DataItem[] => {
-  return statistics.map((stat, index) => {
-    const emoji = emojis[index % emojis.length];  // Cycle through emojis
+  return statistics.map((stat) => {
+    const emoji = emojiMap[stat.avatar] || '❓';
     const color = getColorForEmoji(emoji);
     return { number: stat.completed, emoji, color };
   });
 };
 
-
-async function getChoreStatistics(
+const getChoreStatistics = async (
   householdId: string
-): Promise<Array<{ profileId: string; choreId: string; completed: number }>> {
+): Promise<Array<{ profileId: string; completed: number; avatar: EmojiKeys }>> => {
   const completedChores = await getCompletedChoresByHousehold(householdId);
-  const statisticsMap: Map<string, { profileId: string; choreId: string; completed: number }> = new Map();
+  const profiles = await getProfiles();
+  const profileAvatarMap = Object.fromEntries(profiles.map(profile => [profile.id, profile.avatar]));
+
+  const statisticsMap: Map<string, { profileId: string; completed: number; avatar: EmojiKeys }> = new Map();
 
   completedChores.forEach((chore) => {
-    // Trim any extra whitespace from the profileId and choreId
     const profileId = chore.profileId.trim();
-    const choreId = chore.choreId.trim();
-    const key = `${profileId}-${choreId}`;  // Create a unique key for each profile-chore pair
+    const avatar = profileAvatarMap[profileId] as EmojiKeys;
 
-    const existingStat = statisticsMap.get(key);
+    const existingStat = statisticsMap.get(profileId);  // using profileId as the key now
 
     if (existingStat) {
-      // If a statistics entry exists, increment the completed count
       existingStat.completed++;
     } else {
-      // If no statistics entry exists, create a new one with a completed count of 1
-      statisticsMap.set(key, { profileId, choreId, completed: 1 });
+      statisticsMap.set(profileId, { profileId, completed: 1, avatar });
     }
   });
 
-  // Convert the Map to an Array before returning
-  const statisticsArray = Array.from(statisticsMap.values());
-  
-  console.log(statisticsArray);
-  return statisticsArray;
+  return Array.from(statisticsMap.values());
+};
+
+
+//  Code for PieChart for all of the chores in a specific fousehold
+
+interface ChoreStatistics {
+  [choreName: string]: {
+    [profileName: string]: {
+      count: number;
+      avatar: EmojiKeys;
+    };
+  };
 }
 
+const mapChoreStatisticsToDataItems = (
+  statistics: ChoreStatistics
+): Record<string, DataItem[]> => {
+  const result: Record<string, DataItem[]> = {};
 
-const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
-  const [choreStatistics, setChoreStatistics] = React.useState<
-    Array<{ profileId: string; choreId: string; completed: number }>
-  >([]);
+  for (const choreName in statistics) {
+    result[choreName] = Object.values(statistics[choreName]).map(({ count, avatar }) => ({
+      number: count,
+      emoji: emojiMap[avatar] || '❓',
+      color: getColorForEmoji(emojiMap[avatar] || '❓'),
+    }));
+  }
 
-  React.useEffect(() => {
-    async function fetchChoreStatistics() {
-      const statistics = await getChoreStatistics("Hus 1");
-      setChoreStatistics(statistics);
+  return result;
+};
+
+const getHouseholdChoreStatistics = async (householdId: string) => {
+  const completedChores = await getCompletedChoresByHousehold(householdId);
+  const profiles = await getProfiles();
+  const chores = await getChores();
+
+  const profileIdMap = Object.fromEntries(profiles.map(profile => [profile.id, profile]));
+  const choreIdMap = Object.fromEntries(chores.map(chore => [chore.id, chore]));
+
+  const statistics: ChoreStatistics = {};
+
+  completedChores.forEach(chore => {
+    const choreName = choreIdMap[chore.choreId]?.name || 'Unknown Chore';
+    const profileId = chore.profileId;
+    const profile = profileIdMap[profileId];
+    const profileName = profile?.name || 'Unknown Profile';
+    const avatar = (profile?.avatar || '❓') as EmojiKeys; 
+
+    if (!statistics[choreName]) {
+      statistics[choreName] = {};
     }
 
-    fetchChoreStatistics();
-  }, [householdId]);
+    if (!statistics[choreName][profileName]) {
+      statistics[choreName][profileName] = { count: 0, avatar };
+    }
 
+    statistics[choreName][profileName].count++;
+  });
+
+  return statistics;
+};
+
+const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
+  const [choreStatistics, setChoreStatistics] = React.useState<Array<{ profileId: string; completed: number; avatar: EmojiKeys }>>([]);
+  const [householdChoreStatistics, setHouseholdChoreStatistics] = React.useState<ChoreStatistics>({});
+
+  React.useEffect(() => {
+    async function fetchStatistics() {
+      const choreStats = await getChoreStatistics(householdId); // Put Household ID here
+      const householdChoreStats = await getHouseholdChoreStatistics(householdId); // Put Household ID here
+      setChoreStatistics(choreStats);
+      setHouseholdChoreStatistics(householdChoreStats);
+    }
+  
+    fetchStatistics();
+  }, [householdId]);
+  
   const dataItems = React.useMemo(() => mapStatisticsToDataItems(choreStatistics), [choreStatistics]);
+  const choreDataItems = React.useMemo(() => mapChoreStatisticsToDataItems(householdChoreStatistics), [householdChoreStatistics]);
 
   return (
     <ScrollView style={styles.container}>
+      {/*Show total*/}
       <View
         style={{
           justifyContent: "center",
@@ -111,9 +169,9 @@ const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
           <Text style={styles.chartTitle}>Totalt</Text>
         </View>
       </View>
-
+      {/*Show individual chore*/}
       <View style={[styles.flexContainer, { marginTop: 20 }]}>
-        {dataItems.map((category, index) => (
+        {Object.entries(choreDataItems).map(([choreName, dataItems], index) => (
           <View key={index} style={styles.flexItem}>
             <View style={styles.chartContainer}>
               <StatisticComponent
@@ -121,7 +179,7 @@ const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
                 chartSize={100}
                 emojiSize={15}
               />
-              {/* <Text style={styles.chartTitle}>{category}</Text> */}
+              <Text style={styles.chartTitle}>{choreName}</Text>
             </View>
           </View>
         ))}

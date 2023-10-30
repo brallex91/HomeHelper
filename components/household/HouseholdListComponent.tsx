@@ -8,18 +8,25 @@ import {
 } from "react-native";
 import { Button, Card, Text, useTheme } from "react-native-paper";
 import { useDispatch } from "react-redux";
-import { getChores } from "../../api/chores";
 import { setChoreDetails } from "../../store/choreDetailsSlice";
 import { Chore } from "../../store/choreSlice";
+import { Household } from "../../store/houseHoldSlice";
+import { collection, doc, getDoc } from "firebase/firestore";
+import { database } from "../../database/firebaseConfig";
 
-export default function HouseholdListComponent() {
+
+interface HouseholdListComponentProps {
+  household: Household;
+}
+
+export default function HouseholdListComponent({ household }: HouseholdListComponentProps) {
   const dispatch = useDispatch();
   const [chores, setChores] = React.useState<Chore[]>([]);
   const navigation = useNavigation();
   const theme = useTheme();
 
   const navigateToAddNewChore = () => {
-    navigation.navigate("AddNewChore");
+    navigation.navigate("AddNewChore", { householdId: household.id });
   };
 
   const navigateToChoreDetails = (chore: any) => {
@@ -31,7 +38,18 @@ export default function HouseholdListComponent() {
     React.useCallback(() => {
       async function fetchChores() {
         try {
-          const choresData = await getChores();
+          const choresCollection = collection(database, "chores");
+          const choresData: Chore[] = [];
+
+          for (const choreId of household.chores) {
+            const choreRef = doc(choresCollection, choreId);
+            const choreDoc = await getDoc(choreRef);
+            if (choreDoc.exists()) {
+              const chore = { id: choreDoc.id, ...choreDoc.data() } as Chore;
+              choresData.push(chore);
+            }
+          }
+
           setChores(choresData);
         } catch (error) {
           console.error("Error fetching chores:", error);
@@ -39,10 +57,10 @@ export default function HouseholdListComponent() {
       }
 
       fetchChores();
-    }, [])
-  );
+    }, [household.chores])
+);
 
-
+  
   const getDaysLeftToDoChore = (lastCompleted: Date, interval: number) => {
     // Skapar en ny datumobjekt baserat på när uppgiften senast utfördes.
     const nextDueDate = new Date(lastCompleted);
