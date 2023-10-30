@@ -1,10 +1,11 @@
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { addProfile } from "../api/profiles";
 import { auth, database } from "../database/firebaseConfig";
+import { RootStackParamList } from "../navigation/RootNavigator";
 import { ProfileCreate } from "../store/profileSlice";
 
 const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
@@ -58,11 +59,11 @@ const convertEmojiToString = (emoji: string) => {
   }
 };
 
-const CreateProfileComponent = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfileScreen'>
+
+const CreateProfileComponent = ({ navigation, route}: Props) => {
   const theme = useTheme();
-  const route = useRoute();
-  const { householdId } = route.params;
-  const navigation = useNavigation();
+  const { household } = route.params;
   const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
   const [profileData, setProfileData] = useState<ProfileCreate>({
     name: "",
@@ -84,11 +85,11 @@ const CreateProfileComponent = () => {
     const avatarString = convertEmojiToString(profileData.avatar);
     const profileDoc = await addProfile({ ...profileData, avatar: avatarString });
     // Update the household's chores array to include the new chore's ID
-    const householdRef = doc(database, 'households', householdId);  // Assume your household collection is named 'households'
+    const householdRef = doc(database, 'households', household.id);  // Assume your household collection is named 'households'
     await updateDoc(householdRef, {
       members: arrayUnion(profileDoc.id)  // Use arrayUnion to add the new chore ID to the chores array
     });
-    navigation.navigate("HouseholdChores",  { householdId: household.id });
+    navigation.navigate("HouseholdChores", route.params);
   };  
   
   const renderEmojis = () => {

@@ -16,13 +16,13 @@ export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   Register: undefined;
-  HouseholdChores: undefined;
+  HouseholdChores: { household: Household };
   HouseholdOverview: undefined;
   AddNewChore: undefined;
   AddNewHousehold: undefined;
   HouseholdElementOverviewScreen: { household: Household };
   ChoreDetails: undefined;
-  CreateProfileScreen: undefined;
+  CreateProfileScreen: { household: Household };
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
