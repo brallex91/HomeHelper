@@ -34,7 +34,7 @@ export async function getHouseholdByCode(code: string) {
       return null;
     }
     const doc = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
+    return { id: doc.id, ...doc.data() } as Household;
   } catch (error) {
     console.error('Fel vid hämtning av hushåll:', error);
     throw error;
