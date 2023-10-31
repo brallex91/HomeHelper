@@ -88,8 +88,17 @@ export default function HouseholdListComponent({
   };
 
   const getAvatarsForChore = (choreId: string): string => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return completedChores
-      .filter((c) => c.choreId === choreId)
+      .filter((c) => {
+        const completedDate = new Date(c.date);
+        completedDate.setHours(0, 0, 0, 0);
+        return (
+          c.choreId === choreId && completedDate.getTime() === today.getTime()
+        );
+      })
       .map((c) => {
         const profile = profiles.find((p) => p.id === c.profileId);
         return profile && emojiMap[profile.avatar as keyof typeof emojiMap]

@@ -124,7 +124,7 @@ const ChoreDetailsScreen = () => {
 
       const completedChoreData = {
         choreId: chore.id,
-        date: new Date(),
+        date: new Date().toISOString(),
         profileId: userProfile.id,
         householdId: householdId,
       };
