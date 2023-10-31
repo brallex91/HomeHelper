@@ -62,6 +62,7 @@ const convertEmojiToString = (emoji: string) => {
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfileScreen'>
 
 const CreateProfileComponent = ({ navigation, route}: Props) => {
+  const userID = auth.currentUser?.uid;
   const {currentHousehold, setCurrentHousehold} = useGlobalContext();
   const theme = useTheme();
   const { household } = route.params;
@@ -81,7 +82,6 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
       avatar: emoji,
     }));
   };
-
   const handleButtonPress = async () => {
     const avatarString = convertEmojiToString(profileData.avatar);
     const profileDoc = await addProfile({ ...profileData, avatar: avatarString });
@@ -89,7 +89,7 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
     const householdRef = doc(database, 'households', household.id);  // Assume your household collection is named 'households'
     await updateDoc(householdRef, {
       members: arrayUnion(profileDoc.id),
-      userId: arrayUnion(userID)
+      userId: arrayUnion(userID)  // Use arrayUnion to add the new chore ID to the chores array
     });
     navigation.navigate("HouseholdChores", route.params);
   };  
