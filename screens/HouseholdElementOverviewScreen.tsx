@@ -39,7 +39,7 @@ export default function HouseholdElementOverviewScreen ({ navigation, route}: Pr
       const profilesData = await getProfiles();
       setProfiles(profilesData);
     }
-
+    navigation.setOptions({ title: household.name});
     checkOwnership();
     fetchProfiles();
   }, [household.ownerID]);
@@ -56,7 +56,7 @@ export default function HouseholdElementOverviewScreen ({ navigation, route}: Pr
           <Card.Title title={household.name} subtitle={`Key: ${household.key}`} />
         </Card>
       </View>
-  
+      
       <FlatList
         contentContainerStyle={styles.cardContainer}
         data={household.members}
@@ -140,4 +140,3 @@ const styles = StyleSheet.create({
         padding: 8,
     },
 });
-  

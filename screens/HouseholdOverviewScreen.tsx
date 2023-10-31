@@ -9,12 +9,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import * as React from "react";
 import { Button, Card, useTheme } from 'react-native-paper';
 import { getHouseholdByCode, getHouseholds } from '../api/household';
 import { useGlobalContext } from '../context/context';
 import { auth } from '../database/firebaseConfig';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Household } from '../store/houseHoldSlice';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HouseholdOverview'>
 
@@ -36,14 +38,15 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
 
   const theme = useTheme();
 
-  useEffect(() => {
-    async function fetchHouseholds() {
-      const householdData = await getHouseholds();
-      setHouseholds(householdData);
-    }
-
-    fetchHouseholds();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchHouseholds() {
+        const householdData = await getHouseholds();
+        setHouseholds(householdData);
+      }
+      fetchHouseholds();
+    }, [])
+  );
 
   const navigateAddNewHousehold = () => {
     navigation.navigate('AddNewHousehold');
