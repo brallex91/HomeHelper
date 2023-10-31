@@ -5,44 +5,51 @@ import { addDoc, collection } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { addHousehold } from "../store/houseHoldSlice";
 import { Button, useTheme, TextInput } from 'react-native-paper';
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/RootNavigator";
 
-const CreateHousehold = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'AddNewHousehold'>;
+
+const CreateHousehold = ({ navigation, route }: Props) => {
   const dispatch = useDispatch();
   const [householdName, setHouseholdName] = useState("");
-
   const theme = useTheme();
 
   const createHousehold = async () => {
+    console.log(navigation);
     try {
       const generatedKey = Math.random().toString(36).substring(2, 6);
-      const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
-  
-      const userID = auth.currentUser?.uid || userMockUID;
+      const userID = auth.currentUser?.uid;
   
       if (!userID) {
         throw new Error("User not authenticated and no mock user ID available");
       }
   
-      const householdData = {
+      const household = {
         name: householdName,
         key: generatedKey,
         members: [],
         chores: [],
         ownerID: userID,
+        userId: []
       };
 
-      if(!householdData.name){
+      if(!household.name){
         throw new Error("User not authenticated and no mock user ID available");
       }
   
       const docRef = await addDoc(
         collection(database, "households"),
-        householdData,
+        household,
       );
   
       console.log("Household created with ID:", docRef.id);
   
-      dispatch(addHousehold({ ...householdData, id: docRef.id }));
+      dispatch(addHousehold({ ...household, id: docRef.id }));
+  
+      // Navigate to the CreateProfileComponent screen, passing the household object as a parameter
+      navigation.navigate('CreateProfileScreen', { household: { ...household, id: docRef.id } });
+      console.log("Sendinghousehold:",  household);
     } catch (error: any) {
       console.error("Create household error:", error.message);
     }

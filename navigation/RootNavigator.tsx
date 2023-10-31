@@ -11,6 +11,7 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import { Household } from '../store/houseHoldSlice';
+import CreateHousehold from '../components/houseHoldGenComponent';
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -89,7 +90,7 @@ export default function RootNavigator() {
       />
       <RootStack.Screen
         name='AddNewHousehold'
-        component={AddNewHousehold}
+        component={CreateHousehold}
         options={{
           headerTitleAlign: 'center',
         }}
