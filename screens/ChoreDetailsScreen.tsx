@@ -1,4 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
+import { Audio } from "expo-av";
 import {
   addDoc,
   collection,
@@ -130,6 +131,7 @@ const ChoreDetailsScreen = () => {
       };
 
       await addDoc(collection(database, "completedChores"), completedChoreData);
+      await playCompletionSound();
       console.log("Completed chore added to database:", completedChoreData);
     } catch (error) {
       console.error("Error completing chore:", error);
@@ -139,6 +141,22 @@ const ChoreDetailsScreen = () => {
   if (!chore) {
     return <Text>No chore selected.</Text>;
   }
+
+  const playCompletionSound = async () => {
+    const sound = new Audio.Sound();
+    try {
+      await sound.loadAsync(require("../assets/ChoreCompleted.mp3"));
+      await sound.playAsync();
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          await sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.error("Failed to play completion sound", error);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
