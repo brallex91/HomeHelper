@@ -9,8 +9,7 @@ import { auth, database } from "../database/firebaseConfig";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { ProfileCreate } from "../store/profileSlice";
 
-const userMockUID = "oYWnfRp0yKWX5fFwG9JxQ6IYppt1";
-const userID = auth.currentUser?.uid || userMockUID;
+const userID = auth.currentUser?.uid;
 const emojis = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"] as const;
 type Emoji = typeof emojis[number];
 
@@ -89,7 +88,8 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
     // Update the household's chores array to include the new chore's ID
     const householdRef = doc(database, 'households', household.id);  // Assume your household collection is named 'households'
     await updateDoc(householdRef, {
-      members: arrayUnion(profileDoc.id)  // Use arrayUnion to add the new chore ID to the chores array
+      members: arrayUnion(profileDoc.id),
+      userId: arrayUnion(userID)
     });
     navigation.navigate("HouseholdChores", route.params);
   };  

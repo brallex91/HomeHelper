@@ -1,11 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export interface Profile {
-  id: string;
-  name: string;
-  avatar: string;
-}
-
 export interface Household {
   id: string;
   name: string;

@@ -69,7 +69,7 @@ const getChoreStatistics = async (
     if (existingStat) {
       existingStat.completed++;
     } else {
-      statisticsMap.set(profileId, { profileId, completed: 1 + energy, avatar });
+      statisticsMap.set(profileId, { profileId, completed: 1, avatar });
     }
   });
 
@@ -130,7 +130,7 @@ const getHouseholdChoreStatistics = async (householdId: string) => {
       statistics[choreName][profileName] = { count: 0, avatar };
     }
 
-    statistics[choreName][profileName].count += 1 + energy;  // Increment count by 1 plus the energyLevel
+    statistics[choreName][profileName].count++;  // Increment count by 1 plus the energyLevel
   });
 
   return statistics;

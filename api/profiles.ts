@@ -1,6 +1,6 @@
 import { DocumentData, addDoc, collection, getDocs } from "firebase/firestore";
 import { database } from "../database/firebaseConfig";
-import { ProfileCreate } from "../store/profileSlice";
+import { Profile, ProfileCreate } from "../store/profileSlice";
 
 export async function getProfiles(): Promise<Profile[]> {
   const querySnapshot = await getDocs(collection(database, "profiles"));

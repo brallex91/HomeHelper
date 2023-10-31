@@ -4,7 +4,7 @@ export interface Profile {
     id: string;
     name: string;
     avatar: string; 
-    userId: string;
+    userId?: string;
   }
 
 export type ProfileCreate = Omit<Profile, "id">
