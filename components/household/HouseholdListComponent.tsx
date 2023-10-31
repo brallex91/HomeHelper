@@ -20,6 +20,7 @@ import { setChoreDetails } from "../../store/choreDetailsSlice";
 import { Chore } from "../../store/choreSlice";
 import { Household } from "../../store/houseHoldSlice";
 import { Profile } from "../../store/profileSlice";
+import OptionsButton from "../OptionsButton";
 
 export const emojiMap: Record<string, string> = {
   fox: "🦊",
@@ -118,27 +119,32 @@ export default function HouseholdListComponent({
   };
 
   const BottomButtonBar = () => (
-    <View style={styles.buttonBar}>
-      <Button
-        icon="plus-circle-outline"
-        mode="contained"
-        onPress={navigateToAddNewChore}
-        style={styles.button}
-        labelStyle={styles.buttonLabel}
-        contentStyle={styles.buttonContent}
-      >
-        Lägg Till
-      </Button>
-      <Button
-        icon="pencil-outline"
-        mode="contained"
-        onPress={() => console.log("Pressed")}
-        style={styles.button}
-        labelStyle={styles.buttonLabel}
-        contentStyle={styles.buttonContent}
-      >
-        Ändra
-      </Button>
+    <View style={styles.buttonBarContainer}>
+      <View style={styles.optionsButtonContainer}>
+        <OptionsButton size={36} />
+      </View>
+      <View style={styles.buttonBar}>
+        <Button
+          icon="plus-circle-outline"
+          mode="contained"
+          onPress={navigateToAddNewChore}
+          style={styles.button}
+          labelStyle={styles.buttonLabel}
+          contentStyle={styles.buttonContent}
+        >
+          Lägg Till
+        </Button>
+        <Button
+          icon="pencil-outline"
+          mode="contained"
+          onPress={() => console.log("Pressed")}
+          style={[styles.button, { marginLeft: 8 }]}
+          labelStyle={styles.buttonLabel}
+          contentStyle={styles.buttonContent}
+        >
+          Ändra
+        </Button>
+      </View>
     </View>
   );
 
@@ -202,13 +208,21 @@ const styles = StyleSheet.create({
     fontSize: 28,
     letterSpacing: -6,
   },
+  buttonBarContainer: {
+    marginBottom: 40,
+    paddingHorizontal: 10,
+  },
+  optionsButtonContainer: {
+    alignSelf: "flex-end",
+    marginBottom: 10,
+  },
   buttonBar: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginBottom: 40,
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   button: {
-    marginHorizontal: 4,
+    marginHorizontal: 8,
     borderColor: "rgb(242, 242, 242)",
     borderWidth: 1,
     borderRadius: 20,

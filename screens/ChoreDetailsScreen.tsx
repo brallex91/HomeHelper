@@ -1,4 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
+import { Audio } from "expo-av";
 import {
   addDoc,
   collection,
@@ -17,7 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Button, Card, useTheme } from "react-native-paper";
+import { Button, Card, Snackbar, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import NumberSelectionModal from "../components/NumberSelectionModal";
 import { auth, database } from "../database/firebaseConfig";
@@ -39,6 +40,7 @@ const ChoreDetailsScreen = () => {
     useState(false);
   const [isEnergyLevelSelectionVisible, setEnergyLevelSelectionVisible] =
     useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   useEffect(() => {
     if (chore) {
@@ -130,6 +132,8 @@ const ChoreDetailsScreen = () => {
       };
 
       await addDoc(collection(database, "completedChores"), completedChoreData);
+      await playCompletionSound();
+      setSnackbarVisible(true);
       console.log("Completed chore added to database:", completedChoreData);
     } catch (error) {
       console.error("Error completing chore:", error);
@@ -139,6 +143,22 @@ const ChoreDetailsScreen = () => {
   if (!chore) {
     return <Text>No chore selected.</Text>;
   }
+
+  const playCompletionSound = async () => {
+    const sound = new Audio.Sound();
+    try {
+      await sound.loadAsync(require("../assets/ChoreCompleted.mp3"));
+      await sound.playAsync();
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          await sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.error("Failed to play completion sound", error);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -226,6 +246,14 @@ const ChoreDetailsScreen = () => {
         closeModal={() => setEnergyLevelSelectionVisible(false)}
         selectNumber={setNewEnergyLevel}
       />
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={2000}
+        style={styles.snackbar}
+      >
+        <Text>{chore.name} Completed!!!</Text>
+      </Snackbar>
     </View>
   );
 };
@@ -257,6 +285,11 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 10,
+  },
+  snackbar: {
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: "green", // Eller vilken färg du föredrar
   },
 });
 
