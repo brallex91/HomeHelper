@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Button, Card, useTheme } from 'react-native-paper';
 import { getHouseholdByCode, getHouseholds } from '../api/household';
+import { useGlobalContext } from '../context/context';
 import { auth } from '../database/firebaseConfig';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Household } from '../store/houseHoldSlice';
@@ -18,6 +19,7 @@ import { Household } from '../store/houseHoldSlice';
 type Props = NativeStackScreenProps<RootStackParamList, 'HouseholdOverview'>
 
 export default function HouseholdOverviewScreen({ navigation }: Props) {
+  const { currentHousehold, setCurrentHousehold } = useGlobalContext(); 
   const [households, setHouseholds] = useState<Household[]>([]);
   const [householdCode, setHouseholdCode] = useState('');
   const [error, setError] = useState('');
@@ -49,8 +51,7 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
 
   // --- START OF CHECKHOUSEHOLDCODE --- //
   const joinHousehold = async () => {
-    setError('');
-
+    setError(''); 
     try {
       setIsJoiningHousehold(true);
 
@@ -58,6 +59,7 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
 
       if (household) {
         console.log('Hushåll hittat!!!');
+        setCurrentHousehold(household.id);
         navigation.navigate('CreateProfileScreen', { household });
       } else {
         setError('Hushåll ej hittat');

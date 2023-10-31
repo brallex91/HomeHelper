@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { addProfile } from "../api/profiles";
+import { useGlobalContext } from "../context/context";
 import { auth, database } from "../database/firebaseConfig";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { ProfileCreate } from "../store/profileSlice";
@@ -62,6 +63,7 @@ const convertEmojiToString = (emoji: string) => {
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfileScreen'>
 
 const CreateProfileComponent = ({ navigation, route}: Props) => {
+  const {currentHousehold, setCurrentHousehold} = useGlobalContext();
   const theme = useTheme();
   const { household } = route.params;
   const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
@@ -114,7 +116,8 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
   };
 
   return (
-    <View style={styles.container}>       
+    <View style={styles.container}>  
+        <Text>HOUSEHOLD: {currentHousehold}</Text>   
         <TextInput value={profileData.name} 
                    style={styles.textinput} 
                    onChangeText={(text) =>
