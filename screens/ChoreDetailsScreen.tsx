@@ -1,11 +1,26 @@
 import { useNavigation } from "@react-navigation/native";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Button, Card, Text, TextInput, useTheme } from "react-native-paper";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Button, Card, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import NumberSelectionModal from "../components/NumberSelectionModal";
-import { database } from "../database/firebaseConfig";
+import { auth, database } from "../database/firebaseConfig";
 import { updateChoreDetails } from "../store/choreDetailsSlice";
 import { RootState } from "../store/store";
 
@@ -14,11 +29,12 @@ const ChoreDetailsScreen = () => {
   const chore = useSelector((state: RootState) => state.choreDetails.chore);
   const dispatch = useDispatch();
   const theme = useTheme();
-  const [newName, setNewName] = useState("");
-  const [newDescription, setNewDescription] = useState("");
+  const [newName, setNewName] = useState(chore?.name || "");
+  const [newDescription, setNewDescription] = useState(
+    chore?.description || ""
+  );
   const [newFrequency, setNewFrequency] = useState(chore?.frequency || 1);
   const [newEnergyLevel, setNewEnergyLevel] = useState(chore?.energyLevel || 1);
-  // const [lastCompletedChore, setLastCompletedChore] = useState(false);
   const [isFrequencySelectionVisible, setFrequencySelectionVisible] =
     useState(false);
   const [isEnergyLevelSelectionVisible, setEnergyLevelSelectionVisible] =
@@ -30,14 +46,12 @@ const ChoreDetailsScreen = () => {
       setNewDescription(chore.description);
       setNewFrequency(chore.frequency);
       setNewEnergyLevel(chore.energyLevel);
-      navigation.setOptions({ title: chore.description });
+      navigation.setOptions({ title: chore.name });
     }
-  }, [chore]);
+  }, [chore, navigation]);
 
   const handleUpdateChore = async () => {
-    if (!chore) {
-      return;
-    }
+    if (!chore) return;
 
     const updatedChore = {
       ...chore,
@@ -45,48 +59,86 @@ const ChoreDetailsScreen = () => {
       description: newDescription,
       frequency: newFrequency,
       energyLevel: newEnergyLevel,
-      lastCompleted: new Date().toString(),
+      lastCompleted: new Date().toISOString(),
     };
 
+    const choreRef = doc(database, "chores", chore.id);
+
     try {
-      const choreRef = doc(database, "chores", chore.id);
-      await setDoc(choreRef, updatedChore);
-      console.log("Chore updated in Firestore.");
+      await updateDoc(choreRef, updatedChore);
       dispatch(updateChoreDetails(updatedChore));
     } catch (error) {
-      console.error("Error updating chore in Firestore:", error);
+      console.error("Error updating chore:", error);
+    }
+  };
+
+  const handleCompleteChore = async () => {
+    console.log("Starting handleCompleteChore...");
+
+    if (!chore) {
+      console.log("No chore found");
+      return;
+    }
+
+    const userId = auth.currentUser?.uid;
+    if (!userId) {
+      console.log("No user ID found");
+      return;
+    }
+    console.log(`User ID: ${userId}`);
+
+    try {
+      const householdQuery = query(
+        collection(database, "households"),
+        where("chores", "array-contains", chore.id)
+      );
+      const householdSnapshot = await getDocs(householdQuery);
+
+      if (householdSnapshot.empty) {
+        console.log("No household found containing the chore");
+        return;
+      }
+
+      const household = householdSnapshot.docs[0].data();
+      const householdId = householdSnapshot.docs[0].id;
+      console.log(`Household ID: ${householdId}`, household);
+
+      const userProfilesQuery = query(
+        collection(database, "profiles"),
+        where("userId", "==", userId)
+      );
+      const userProfilesSnapshot = await getDocs(userProfilesQuery);
+      console.log(
+        `Found profiles for user: ${userProfilesSnapshot.docs.length}`
+      );
+
+      const userProfile = userProfilesSnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .find((prof) => household.members.includes(prof.id));
+
+      if (!userProfile) {
+        console.log("No matching profile found for the user in this household");
+        return;
+      }
+      console.log("Matching profile ID:", userProfile.id);
+
+      const completedChoreData = {
+        choreId: chore.id,
+        date: new Date(),
+        profileId: userProfile.id,
+        householdId: householdId,
+      };
+
+      await addDoc(collection(database, "completedChores"), completedChoreData);
+      console.log("Completed chore added to database:", completedChoreData);
+    } catch (error) {
+      console.error("Error completing chore:", error);
     }
   };
 
   if (!chore) {
     return <Text>No chore selected.</Text>;
   }
-
-  const openFrequencySelectionModal = () => {
-    setFrequencySelectionVisible(true);
-  };
-
-  const closeFrequencySelectionModal = () => {
-    setFrequencySelectionVisible(false);
-  };
-
-  const openEnergyLevelSelectionModal = () => {
-    setEnergyLevelSelectionVisible(true);
-  };
-
-  const closeEnergyLevelSelectionModal = () => {
-    setEnergyLevelSelectionVisible(false);
-  };
-
-  const selectFrequency = (number: number) => {
-    setNewFrequency(number);
-    closeFrequencySelectionModal();
-  };
-
-  const selectEnergyLevel = (number: number) => {
-    setNewEnergyLevel(number);
-    closeEnergyLevelSelectionModal();
-  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -97,10 +149,9 @@ const ChoreDetailsScreen = () => {
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text>Name: </Text>
                 <TextInput
-                  mode="outlined"
                   value={newName}
-                  onChangeText={(text) => setNewName(text)}
-                  style={{ width: 250, height: 40 }}
+                  onChangeText={setNewName}
+                  style={styles.input}
                 />
               </View>
             }
@@ -112,10 +163,9 @@ const ChoreDetailsScreen = () => {
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text>Description: </Text>
                 <TextInput
-                  mode="outlined"
                   value={newDescription}
-                  onChangeText={(text) => setNewDescription(text)}
-                  style={{ width: 150, height: 40 }}
+                  onChangeText={setNewDescription}
+                  style={styles.input}
                 />
               </View>
             }
@@ -125,13 +175,11 @@ const ChoreDetailsScreen = () => {
           <Card.Title
             title="Frequency"
             right={() => (
-              <TouchableOpacity onPress={openFrequencySelectionModal}>
-                <View style={styles.textRow}>
-                  <Text>var</Text>
-                  <View style={styles.redCircle}>
-                    <Text style={{ color: "white" }}>{newFrequency}</Text>
-                  </View>
-                  <Text>dag</Text>
+              <TouchableOpacity
+                onPress={() => setFrequencySelectionVisible(true)}
+              >
+                <View style={styles.frequency}>
+                  <Text>{newFrequency} days</Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -140,104 +188,76 @@ const ChoreDetailsScreen = () => {
         <Card style={styles.card}>
           <Card.Title
             title="Energy Level"
-            subtitle="How energy-demanding is the task?"
             right={() => (
-              <TouchableOpacity onPress={openEnergyLevelSelectionModal}>
-                <View style={styles.greyCircle}>
+              <TouchableOpacity
+                onPress={() => setEnergyLevelSelectionVisible(true)}
+              >
+                <View style={styles.energyLevel}>
                   <Text>{newEnergyLevel}</Text>
                 </View>
               </TouchableOpacity>
             )}
           />
         </Card>
-        <View style={styles.buttomRow}>
-          <View style={styles.buttonBar}>
-            <Button
-              onPress={handleUpdateChore}
-              icon="pencil"
-              mode="contained"
-              color={theme.colors.primary}
-              style={styles.button}
-              labelStyle={styles.buttonLabel}
-              contentStyle={styles.buttonContent}
-            >
-              Save
-            </Button>
-          </View>
-        </View>
+        <Button
+          icon="content-save"
+          mode="contained"
+          onPress={handleUpdateChore}
+          style={styles.button}
+        >
+          Save Changes
+        </Button>
+        <Button
+          icon="check"
+          mode="contained"
+          onPress={handleCompleteChore}
+          style={styles.button}
+        >
+          Mark as Complete
+        </Button>
       </ScrollView>
-
       <NumberSelectionModal
         isVisible={isFrequencySelectionVisible}
-        closeModal={closeFrequencySelectionModal}
-        selectNumber={selectFrequency}
+        closeModal={() => setFrequencySelectionVisible(false)}
+        selectNumber={setNewFrequency}
       />
-
       <NumberSelectionModal
         isVisible={isEnergyLevelSelectionVisible}
-        closeModal={closeEnergyLevelSelectionModal}
-        selectNumber={selectEnergyLevel}
+        closeModal={() => setEnergyLevelSelectionVisible(false)}
+        selectNumber={setNewEnergyLevel}
       />
     </View>
   );
 };
 
-export default ChoreDetailsScreen;
-
 const styles = StyleSheet.create({
   cardContainer: {
-    flex: 1,
-    marginTop: 10,
+    padding: 10,
   },
   card: {
+    marginVertical: 8,
+  },
+  input: {
+    flex: 1,
     marginHorizontal: 10,
-    marginVertical: 5,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
   },
-
-  redCircle: {
-    width: 20,
-    height: 20,
-    backgroundColor: "red",
+  frequency: {
+    marginRight: 10,
+    padding: 6,
+    backgroundColor: "#ddd",
     borderRadius: 10,
-    alignItems: "center",
   },
-  greyCircle: {
-    width: 20,
-    height: 20,
-    backgroundColor: "lightgrey",
+  energyLevel: {
+    marginRight: 10,
+    padding: 6,
+    backgroundColor: "#ddd",
     borderRadius: 10,
-    alignItems: "center",
-    marginRight: 20,
-  },
-  buttomRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  buttonBar: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "flex-end",
-  },
-  checkbox: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
   },
   button: {
-    marginHorizontal: 4,
-    borderColor: "rgb(242, 242, 242)",
-    borderWidth: 1,
-    borderRadius: 20,
-  },
-  buttonLabel: {
-    fontSize: 18,
-  },
-  buttonContent: {
-    padding: 8,
-  },
-  textRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginRight: 10,
+    marginVertical: 10,
   },
 });
+
+export default ChoreDetailsScreen;
