@@ -1,4 +1,5 @@
 import { Entypo } from "@expo/vector-icons";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import React, { useRef, useState } from "react";
 import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native";
 import PagerView from "react-native-pager-view";
@@ -6,7 +7,6 @@ import { Text, useTheme } from "react-native-paper";
 import HouseholdListComponent from "../components/household/HouseholdListComponent";
 import StatisticView from "../components/household/StatisticView";
 import { Household } from "../store/houseHoldSlice";
-import { RouteProp, useRoute } from "@react-navigation/native";
 
 type RootStackParamList = {
   HouseholdChoreScreen: { household: Household };
