@@ -1,5 +1,7 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as React from "react";
+import { useState } from "react";
 import {
   Modal,
   ScrollView,
@@ -8,27 +10,29 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import * as React from "react";
-import { Button, Card, useTheme } from 'react-native-paper';
-import { getHouseholdByCode, getHouseholds } from '../api/household';
-import { useGlobalContext } from '../context/context';
-import { auth } from '../database/firebaseConfig';
-import { RootStackParamList } from '../navigation/RootNavigator';
-import { Household } from '../store/houseHoldSlice';
-import { useFocusEffect } from '@react-navigation/native';
+} from "react-native";
+import { Button, Card, useTheme } from "react-native-paper";
+import { getHouseholdByCode, getHouseholds } from "../api/household";
+import { getProfiles } from "../api/profiles";
+import { useGlobalContext } from "../context/context";
+import { auth } from "../database/firebaseConfig";
+import { RootStackParamList } from "../navigation/RootNavigator";
+import { Household } from "../store/houseHoldSlice";
+import { Profile } from "../store/profileSlice";
+import { EmojiKeys, emojiMap } from "./HouseholdElementOverviewScreen";
 
-type Props = NativeStackScreenProps<RootStackParamList, 'HouseholdOverview'>
+type Props = NativeStackScreenProps<RootStackParamList, "HouseholdOverview">;
 
 export default function HouseholdOverviewScreen({ navigation }: Props) {
-  const { currentHousehold, setCurrentHousehold } = useGlobalContext(); 
+  const { currentHousehold, setCurrentHousehold } = useGlobalContext();
   const [households, setHouseholds] = useState<Household[]>([]);
-  const [householdCode, setHouseholdCode] = useState('');
-  const [error, setError] = useState('');
+  const [householdCode, setHouseholdCode] = useState("");
+  const [error, setError] = useState("");
   const [isJoiningHousehold, setIsJoiningHousehold] = useState(false);
-  
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+
   const navigateToHouseholdElementOverview = (household: Household) => {
-    navigation.navigate('HouseholdElementOverviewScreen', { household });
+    navigation.navigate("HouseholdElementOverviewScreen", { household });
   };
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -48,27 +52,40 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
     }, [])
   );
 
+  React.useEffect(() => {
+    async function fetchProfiles() {
+      try {
+        const profilesData = await getProfiles(); // Make sure you have implemented getProfiles
+        setProfiles(profilesData);
+      } catch (error) {
+        console.error("Error fetching profiles: ", error);
+      }
+    }
+
+    fetchProfiles();
+  }, []);
+
   const navigateAddNewHousehold = () => {
-    navigation.navigate('AddNewHousehold');
+    navigation.navigate("AddNewHousehold");
   };
 
   // --- START OF CHECKHOUSEHOLDCODE --- //
   const joinHousehold = async () => {
-    setError(''); 
+    setError("");
     try {
       setIsJoiningHousehold(true);
 
       const household = await getHouseholdByCode(householdCode);
 
       if (household) {
-        console.log('Hushåll hittat!!!');
+        console.log("Hushåll hittat!!!");
         setCurrentHousehold(household.id);
-        navigation.navigate('CreateProfileScreen', { household });
+        navigation.navigate("CreateProfileScreen", { household });
       } else {
-        setError('Hushåll ej hittat');
+        setError("Hushåll ej hittat");
       }
     } catch (error) {
-      console.error('Något gick fel: ', error);
+      console.error("Något gick fel: ", error);
     } finally {
       setIsJoiningHousehold(false);
     }
@@ -78,26 +95,26 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
   const modalContent = (
     <View>
       <TextInput
-        placeholder='Ange kod'
+        placeholder="Ange kod"
         style={{
           borderWidth: 1,
-          borderColor: 'gray',
+          borderColor: "gray",
           width: 200,
           padding: 10,
           marginBottom: 10,
           fontSize: 25,
-          textAlign: 'left',
+          textAlign: "left",
           paddingLeft: 45,
         }}
         value={householdCode}
         onChangeText={(text) => {
           setHouseholdCode(text);
-          setError('');
+          setError("");
         }}
       />
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
+      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
       <Button
-        style={{ backgroundColor: 'green', zIndex: 2 }}
+        style={{ backgroundColor: "green", zIndex: 2 }}
         onPress={joinHousehold}
         disabled={isJoiningHousehold}
       >
@@ -109,8 +126,8 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
   const BottomButtonBar = () => (
     <View style={styles.buttonBar}>
       <Button
-        icon='plus-circle-outline'
-        mode='contained'
+        icon="plus-circle-outline"
+        mode="contained"
         buttonColor={theme.colors.primary}
         onPress={navigateAddNewHousehold}
         style={styles.button}
@@ -120,8 +137,8 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
         Lägg till nytt hushåll
       </Button>
       <Button
-        icon='plus-circle-outline'
-        mode='contained'
+        icon="plus-circle-outline"
+        mode="contained"
         buttonColor={theme.colors.primary}
         onPress={toggleModal}
         style={styles.button}
@@ -130,7 +147,7 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
       >
         Gå med i ett hushåll
         <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         ></View>
       </Button>
     </View>
@@ -151,12 +168,31 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
             style={styles.card}
             onPress={() => navigateToHouseholdElementOverview(household)}
           >
-            <Card.Title title={household.name} />
+            <Card.Title
+              title={household.name}
+              right={(props) => (
+                <View {...props} style={styles.avatarContainer}>
+                  {household.members.map((memberId) => {
+                    const memberProfile = profiles.find(
+                      (p) => p.id === memberId
+                    );
+                    const emoji = memberProfile
+                      ? emojiMap[memberProfile.avatar as EmojiKeys]
+                      : "❓";
+                    return (
+                      <Text style={styles.avatar} key={memberId}>
+                        {emoji}
+                      </Text>
+                    );
+                  })}
+                </View>
+              )}
+            />
           </Card>
         ))}
       </ScrollView>
       {isModalVisible && (
-        <Modal animationType='slide' visible={isModalVisible}>
+        <Modal animationType="slide" visible={isModalVisible}>
           <View style={styles.modalBackground}>
             <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
               <Text style={styles.closeButtonText}>X</Text>
@@ -182,13 +218,13 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   buttonBar: {
-    flexDirection: 'column',
-    justifyContent: 'space-evenly',
+    flexDirection: "column",
+    justifyContent: "space-evenly",
     marginBottom: 40,
   },
   button: {
     marginHorizontal: 4,
-    borderColor: 'rgb(242, 242, 242)',
+    borderColor: "rgb(242, 242, 242)",
     borderWidth: 1,
     borderRadius: 20,
   },
@@ -200,11 +236,11 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 20,
     left: 20,
     zIndex: 3,
@@ -214,7 +250,14 @@ const styles = StyleSheet.create({
   },
   modalBackground: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatar: {
+    fontSize: 24,
+    margin: 5,
+  },
+  avatarContainer: {
+    flexDirection: "row",
   },
 });
