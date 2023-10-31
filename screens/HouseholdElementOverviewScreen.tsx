@@ -6,6 +6,7 @@ import { updateApiHousehold } from '../api/household';
 import { getProfiles } from '../api/profiles';
 import { auth } from '../database/firebaseConfig';
 import { RootStackParamList } from '../navigation/RootNavigator';
+import { Profile } from '../store/profileSlice';
 
 export type EmojiKeys = 'fox' | 'pig' | 'frog' | 'chick' | 'octopus' | 'dolphin' | 'owl' | 'unicorn';
 
@@ -29,9 +30,6 @@ export default function HouseholdElementOverviewScreen ({ navigation, route}: Pr
   const [profiles, setProfiles] = React.useState<Profile[]>([]);
   const [isOwner, setIsOwner] = React.useState(false);
   const [newHouseholdName, setNewHouseholdName] = React.useState("");
-
-
-  
 
   React.useEffect(() => {
     async function checkOwnership() {
