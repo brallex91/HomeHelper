@@ -3,6 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as React from "react";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Modal,
   ScrollView,
   StyleSheet,
@@ -24,6 +25,7 @@ import { EmojiKeys, emojiMap } from "./HouseholdElementOverviewScreen";
 type Props = NativeStackScreenProps<RootStackParamList, "HouseholdOverview">;
 
 export default function HouseholdOverviewScreen({ navigation }: Props) {
+  const [isLoading, setIsLoading] = React.useState(true);
   const { currentHousehold, setCurrentHousehold } = useGlobalContext();
   const [households, setHouseholds] = useState<Household[]>([]);
   const [householdCode, setHouseholdCode] = useState("");
@@ -45,8 +47,14 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
   useFocusEffect(
     React.useCallback(() => {
       async function fetchHouseholds() {
-        const householdData = await getHouseholds();
-        setHouseholds(householdData);
+        setIsLoading(true);
+        try {
+          const householdData = await getHouseholds();
+          setHouseholds(householdData);
+        } catch (error) {
+          console.error("Error fetching households: ", error);
+        }
+        setIsLoading(false);
       }
       fetchHouseholds();
     }, [])
@@ -159,6 +167,15 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
       household.userId.some((id) => id === auth.currentUser?.uid)
   );
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <View>
       <ScrollView contentContainerStyle={styles.cardContainer}>
@@ -259,5 +276,10 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     flexDirection: "row",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
