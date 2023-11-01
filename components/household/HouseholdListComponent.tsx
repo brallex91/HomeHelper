@@ -1,19 +1,21 @@
-import { useFocusEffect,  useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { collection, doc, getDoc } from "firebase/firestore";
 import * as React from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { Button, Card, useTheme } from "react-native-paper";
+import { Button, Card } from "react-native-paper";
 import { useDispatch } from "react-redux";
 import {
   CompletedChore,
   getCompletedChoresByHousehold,
 } from "../../api/completedChores";
+import { getHouseholdById } from "../../api/household";
 import { getProfiles } from "../../api/profiles";
 import { database } from "../../database/firebaseConfig";
 import { setChoreDetails } from "../../store/choreDetailsSlice";
@@ -21,7 +23,6 @@ import { Chore } from "../../store/choreSlice";
 import { Household } from "../../store/houseHoldSlice";
 import { Profile } from "../../store/profileSlice";
 import OptionsButton from "../OptionsButton";
-import { getHouseholdById } from "../../api/household";
 
 export const emojiMap: Record<string, string> = {
   fox: "🦊",
@@ -42,13 +43,13 @@ export default function HouseholdListComponent({
   household,
 }: HouseholdListComponentProps) {
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = React.useState(true);
   const [chores, setChores] = React.useState<Chore[]>([]);
   const [completedChores, setCompletedChores] = React.useState<
     CompletedChore[]
   >([]);
   const [profiles, setProfiles] = React.useState<Profile[]>([]);
   const navigation = useNavigation();
-
 
   const [currentDay, setCurrentDay] = React.useState<number>(
     new Date().getDate()
@@ -57,18 +58,19 @@ export default function HouseholdListComponent({
   useFocusEffect(
     React.useCallback(() => {
       async function fetchData() {
+        setIsLoading(true);
         try {
           // Fetch the updated household data
           const updatedHousehold = await getHouseholdById(household.id);
-          
+
           if (!updatedHousehold) {
-            console.error('Failed to fetch updated household data');
+            console.error("Failed to fetch updated household data");
             return;
           }
-          
-          const choresCollection = collection(database, 'chores');
+
+          const choresCollection = collection(database, "chores");
           const choresData: Chore[] = [];
-          
+
           for (const choreId of updatedHousehold.chores) {
             const choreRef = doc(choresCollection, choreId);
             const choreDoc = await getDoc(choreRef);
@@ -77,34 +79,36 @@ export default function HouseholdListComponent({
               choresData.push(chore);
             }
           }
-  
+
           setChores(choresData);
-          const fetchedCompletedChores = await getCompletedChoresByHousehold(updatedHousehold.id);
+          const fetchedCompletedChores = await getCompletedChoresByHousehold(
+            updatedHousehold.id
+          );
           setCompletedChores(fetchedCompletedChores);
           const fetchedProfiles = await getProfiles();
           setProfiles(fetchedProfiles);
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error("Error fetching data:", error);
         }
+        setIsLoading(false);
       }
-  
-      fetchData();
-  
-      // Re-fetch data every hour or if the day changes
-      const intervalId = setInterval(() => {
-        const today = new Date().getDate();
-        if (today !== currentDay) {
-          setCurrentDay(today);
-          fetchData();
-        }
-      }, 1000 * 60 * 60);
-      
-      // Clean up interval when component is unmounted or loses focus
-      return () => clearInterval(intervalId);
-  
-    }, [household.id, currentDay])  // Dependency array includes both household.id and currentDay
-  );
 
+      fetchData();
+
+      const intervalId = setInterval(
+        () => {
+          const today = new Date().getDate();
+          if (today !== currentDay) {
+            setCurrentDay(today);
+            fetchData();
+          }
+        },
+        1000 * 60 * 60
+      );
+
+      return () => clearInterval(intervalId);
+    }, [household.id, currentDay])
+  );
 
   const getDaysLeftToDoChore = (
     lastCompleted: Date | null,
@@ -185,11 +189,19 @@ export default function HouseholdListComponent({
     </View>
   );
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         {chores.map((chore) => {
-          
           const daysLeft = chore.lastCompleted
             ? getDaysLeftToDoChore(
                 new Date(chore.lastCompleted),
@@ -290,5 +302,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
