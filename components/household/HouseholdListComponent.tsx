@@ -1,36 +1,36 @@
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { collection, doc, getDoc } from "firebase/firestore";
-import * as React from "react";
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { collection, doc, getDoc } from 'firebase/firestore';
+import * as React from 'react';
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
-} from "react-native";
-import { Button, Card, useTheme } from "react-native-paper";
-import { useDispatch } from "react-redux";
+} from 'react-native';
+import { Button, Card, useTheme } from 'react-native-paper';
+import { useDispatch } from 'react-redux';
 import {
   CompletedChore,
   getCompletedChoresByHousehold,
-} from "../../api/completedChores";
-import { getProfiles } from "../../api/profiles";
-import { database } from "../../database/firebaseConfig";
-import { setChoreDetails } from "../../store/choreDetailsSlice";
-import { Chore } from "../../store/choreSlice";
-import { Household } from "../../store/houseHoldSlice";
-import { Profile } from "../../store/profileSlice";
-import OptionsButton from "../OptionsButton";
+} from '../../api/completedChores';
+import { getProfiles } from '../../api/profiles';
+import { database } from '../../database/firebaseConfig';
+import { setChoreDetails } from '../../store/choreDetailsSlice';
+import { Chore } from '../../store/choreSlice';
+import { Household } from '../../store/houseHoldSlice';
+import { Profile } from '../../store/profileSlice';
+import OptionsButton from '../OptionsButton';
 
 export const emojiMap: Record<string, string> = {
-  fox: "🦊",
-  pig: "🐷",
-  frog: "🐸",
-  chick: "🐥",
-  octopus: "🐙",
-  dolphin: "🐬",
-  owl: "🦉",
-  unicorn: "🦄",
+  fox: '🦊',
+  pig: '🐷',
+  frog: '🐸',
+  chick: '🐥',
+  octopus: '🐙',
+  dolphin: '🐬',
+  owl: '🦉',
+  unicorn: '🦄',
 };
 
 interface HouseholdListComponentProps {
@@ -52,7 +52,7 @@ export default function HouseholdListComponent({
   useFocusEffect(
     React.useCallback(() => {
       async function fetchData() {
-        const choresCollection = collection(database, "chores");
+        const choresCollection = collection(database, 'chores');
         const choresData: Chore[] = [];
 
         for (const choreId of household.chores) {
@@ -104,33 +104,33 @@ export default function HouseholdListComponent({
         const profile = profiles.find((p) => p.id === c.profileId);
         return profile && emojiMap[profile.avatar as keyof typeof emojiMap]
           ? emojiMap[profile.avatar as keyof typeof emojiMap]
-          : "❓";
+          : '❓';
       })
-      .join(" ");
+      .join(' ');
   };
 
   const navigateToAddNewChore = () => {
-    navigation.navigate("AddNewChore", { householdId: household.id });
+    navigation.navigate('AddNewChore', { householdId: household.id });
   };
 
   const navigateToChoreDetails = (chore: Chore) => {
     dispatch(setChoreDetails(chore));
-    navigation.navigate("ChoreDetails");
+    navigation.navigate('ChoreDetails');
   };
 
-  const goBack = () => {
-    navigation.goBack();
+  const returnToOverview = () => {
+    navigation.navigate('HouseholdOverview', { householdId: household.id });
   };
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBarContainer}>
       <View style={styles.optionsButtonContainer}>
-        <OptionsButton size={36} onGoBack={goBack} />
+        <OptionsButton size={36} onGoBack={returnToOverview} />
       </View>
       <View style={styles.buttonBar}>
         <Button
-          icon="plus-circle-outline"
-          mode="contained"
+          icon='plus-circle-outline'
+          mode='contained'
           onPress={navigateToAddNewChore}
           style={styles.button}
           labelStyle={styles.buttonLabel}
@@ -139,9 +139,9 @@ export default function HouseholdListComponent({
           Lägg Till
         </Button>
         <Button
-          icon="pencil-outline"
-          mode="contained"
-          onPress={() => console.log("Pressed")}
+          icon='pencil-outline'
+          mode='contained'
+          onPress={() => console.log('Pressed')}
           style={[styles.button, { marginLeft: 8 }]}
           labelStyle={styles.buttonLabel}
           contentStyle={styles.buttonContent}
@@ -178,10 +178,10 @@ export default function HouseholdListComponent({
                       <View
                         style={[
                           styles.circle,
-                          { backgroundColor: isOverdue ? "red" : "lightgrey" },
+                          { backgroundColor: isOverdue ? 'red' : 'lightgrey' },
                         ]}
                       >
-                        <Text style={{ color: isOverdue ? "white" : "black" }}>
+                        <Text style={{ color: isOverdue ? 'white' : 'black' }}>
                           {isOverdue ? Math.abs(daysLeft) : daysLeft}
                         </Text>
                       </View>
@@ -217,17 +217,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   optionsButtonContainer: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginBottom: 10,
   },
   buttonBar: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   button: {
     marginHorizontal: 8,
-    borderColor: "rgb(242, 242, 242)",
+    borderColor: 'rgb(242, 242, 242)',
     borderWidth: 1,
     borderRadius: 20,
   },
@@ -238,15 +238,15 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   dueDateContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingRight: 5,
   },
   circle: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 10,
   },
 });
