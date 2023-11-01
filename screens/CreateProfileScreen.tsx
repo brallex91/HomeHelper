@@ -1,13 +1,16 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
-import { addProfile } from "../api/profiles";
+import { ActivityIndicator, Button, Text, TextInput, useTheme } from "react-native-paper";
+import { getHouseholdById } from "../api/household";
+import { addProfile, getProfileById } from "../api/profiles";
 import { useGlobalContext } from "../context/context";
 import { auth, database } from "../database/firebaseConfig";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { ProfileCreate } from "../store/profileSlice";
+import { Profile, ProfileCreate } from "../store/profileSlice";
+import { EmojiKeys, emojiMap } from "./HouseholdElementOverviewScreen";
 
 const userID = auth.currentUser?.uid;
 const emojis = ["🦊", "🐷", "🐸", "🐥", "🐙", "🐬", "🦉", "🦄"] as const;
@@ -61,9 +64,9 @@ const convertEmojiToString = (emoji: string) => {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateProfileScreen'>
 
-const CreateProfileComponent = ({ navigation, route}: Props) => {
+const CreateProfileComponent = ({ navigation, route }: Props) => {
   const userID = auth.currentUser?.uid;
-  const {currentHousehold, setCurrentHousehold} = useGlobalContext();
+  const { currentHousehold, setCurrentHousehold } = useGlobalContext();
   const theme = useTheme();
   const { household } = route.params;
   const [selectedEmoji, setSelectedEmoji] = useState<Emoji>();
@@ -73,6 +76,45 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
     userId: userID
   });
   const [emojiColor, setEmojiColor] = useState("#000000");
+  const [isLoading, setIsLoading] = useState(true);
+  const [unavailableEmojis, setUnavailableEmojis] = useState<string[]>([]);
+
+  const fetchData = async () => {
+
+    let memberIdArray: string[] = [];
+    let fetchedProfiles: (Profile | null)[] = [];
+    let unavailableEmojis: string[] = [];
+
+    try {
+      const house = await getHouseholdById(currentHousehold);
+      if (house && house.members) {
+
+        memberIdArray = [...house.members];
+
+        const profilePromises: Promise<Profile | null>[] = memberIdArray.map(member => getProfileById(member));
+
+        fetchedProfiles = await Promise.all(profilePromises);
+        const newUnavailableEmojis: string[] = fetchedProfiles
+          .map(member => member?.avatar)
+          .filter((avatar): avatar is Emoji => avatar !== undefined)
+          .map(avatar => emojiMap[avatar as EmojiKeys]);
+
+        setUnavailableEmojis(newUnavailableEmojis);
+      }
+    } catch (error) {
+      console.error("Error fetching data from Firebase: ", error);
+    }
+    setIsLoading(false);
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchData();
+      return () => {
+
+      };
+    }, [])
+  );
 
   const handleEmojiClick = (emoji: Emoji) => {
     setSelectedEmoji(emoji);
@@ -85,17 +127,18 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
   const handleButtonPress = async () => {
     const avatarString = convertEmojiToString(profileData.avatar);
     const profileDoc = await addProfile({ ...profileData, avatar: avatarString });
-    // Update the household's chores array to include the new chore's ID
-    const householdRef = doc(database, 'households', household.id);  // Assume your household collection is named 'households'
+    const householdRef = doc(database, 'households', household.id);
     await updateDoc(householdRef, {
       members: arrayUnion(profileDoc.id),
-      userId: arrayUnion(userID)  // Use arrayUnion to add the new chore ID to the chores array
+      userId: arrayUnion(userID)
     });
     navigation.navigate("HouseholdChores", route.params);
-  };  
-  
+  };
+
   const renderEmojis = () => {
-    return emojis.map((emoji, index) => (
+    const availableEmojis = emojis.filter(emoji => !unavailableEmojis.includes(emoji));
+
+    return availableEmojis.map((emoji, index) => (
       <TouchableOpacity
         key={index}
         onPress={() => handleEmojiClick(emoji)}
@@ -105,7 +148,7 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
             backgroundColor: getColorForEmoji(emoji),
             borderColor:
               emoji === selectedEmoji ? "#000000" : getColorForEmoji(emoji),
-          }, 
+          },
         ]}
       >
         <Text style={[styles.emojiText, { color: theme.colors.primary }]}>
@@ -116,18 +159,30 @@ const CreateProfileComponent = ({ navigation, route}: Props) => {
   };
 
   return (
-    <View style={styles.container}>  
-        <Text>HOUSEHOLD: {currentHousehold}</Text>   
-        <TextInput value={profileData.name} 
-                   style={styles.textinput} 
-                   onChangeText={(text) =>
-                    setProfileData({ ...profileData, name: text })
-                  }
-                   placeholder="Profilnamn" />       
-      <ScrollView>
-        <View style={styles.emojiList}>{renderEmojis()}</View>
-      </ScrollView>
-      <Button style={styles.button} onPress={() => handleButtonPress()}>Skapa Profil</Button>
+    <View style={styles.container}>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+          <Text>Loading...</Text>
+        </View>
+      ) : (
+        <>
+          <TextInput
+            value={profileData.name}
+            style={styles.textinput}
+            onChangeText={(text) =>
+              setProfileData({ ...profileData, name: text })
+            }
+            placeholder="Profilnamn"
+          />
+          <ScrollView>
+            <View style={styles.emojiList}>{renderEmojis()}</View>
+          </ScrollView>
+          <Button style={styles.button} onPress={() => handleButtonPress()}>
+            Skapa Profil
+          </Button>
+        </>
+      )}
     </View>
   );
 };
@@ -141,7 +196,12 @@ const styles = StyleSheet.create({
   emojiList: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "center", 
+    justifyContent: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emojiContainer: {
     width: "25%",
@@ -149,7 +209,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 5,
     borderRadius: 60,
-    borderWidth: 3 
+    borderWidth: 3
   },
   emojiText: {
     fontSize: 36,

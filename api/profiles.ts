@@ -1,4 +1,4 @@
-import { DocumentData, addDoc, collection, getDocs } from "firebase/firestore";
+import { DocumentData, addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { database } from "../database/firebaseConfig";
 import { Profile, ProfileCreate } from "../store/profileSlice";
 
@@ -18,5 +18,24 @@ export async function addProfile(profileData: ProfileCreate): Promise<DocumentDa
   } catch (error) {
     console.error("Error adding profile: ", error);
     throw error; 
+  }
+}
+
+export async function getProfileById(docId: string) {
+  try {
+
+    const docRef = doc(database, 'profiles', docId);
+
+    const docSnapshot = await getDoc(docRef);
+
+    if (!docSnapshot.exists()) {
+      console.error('No such profile found!');
+      return null;
+    }
+
+    return { id: docSnapshot.id, ...docSnapshot.data() } as Profile;
+  } catch (error) {
+    console.error('Error fetching profile by id:', error);
+    throw error;
   }
 }

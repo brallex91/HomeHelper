@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   setDoc,
@@ -37,6 +38,26 @@ export async function getHouseholdByCode(code: string) {
     return { id: doc.id, ...doc.data() } as Household;
   } catch (error) {
     console.error('Fel vid hämtning av hushåll:', error);
+    throw error;
+  }
+}
+
+export async function getHouseholdById(docId: string) {
+  try {
+    // Reference to the document in the 'households' collection with the given docId
+    const docRef = doc(database, 'households', docId);
+    // Fetch the document
+    const docSnapshot = await getDoc(docRef);
+
+    if (!docSnapshot.exists()) {
+      console.error('No such household found!');
+      return null;
+    }
+
+    // Return the household data with its id
+    return { id: docSnapshot.id, ...docSnapshot.data() } as Household;
+  } catch (error) {
+    console.error('Error fetching household by id:', error);
     throw error;
   }
 }
