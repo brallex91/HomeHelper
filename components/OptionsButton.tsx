@@ -5,9 +5,10 @@ import { IconButton, Menu } from "react-native-paper";
 
 interface OptionsButtonProps {
   size: number;
+  onGoBack?: () => void;
 }
 
-const OptionsButton: React.FC<OptionsButtonProps> = ({ size }) => {
+const OptionsButton: React.FC<OptionsButtonProps> = ({ size, onGoBack }) => {
   const [visible, setVisible] = React.useState(false);
   const navigation = useNavigation();
 
@@ -33,6 +34,13 @@ const OptionsButton: React.FC<OptionsButtonProps> = ({ size }) => {
       anchor={<IconButton icon="cog" size={size} onPress={openMenu} />}
     >
       <Menu.Item onPress={handleLogout} title="Log Out" />
+      <Menu.Item
+        onPress={() => {
+          closeMenu();
+          if (onGoBack) onGoBack();
+        }}
+        title="Go Back"
+      />
     </Menu>
   );
 };

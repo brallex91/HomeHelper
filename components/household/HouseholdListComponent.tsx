@@ -118,10 +118,14 @@ export default function HouseholdListComponent({
     navigation.navigate("ChoreDetails");
   };
 
+  const goBack = () => {
+    navigation.goBack();
+  };
+
   const BottomButtonBar = () => (
     <View style={styles.buttonBarContainer}>
       <View style={styles.optionsButtonContainer}>
-        <OptionsButton size={36} />
+        <OptionsButton size={36} onGoBack={goBack} />
       </View>
       <View style={styles.buttonBar}>
         <Button
