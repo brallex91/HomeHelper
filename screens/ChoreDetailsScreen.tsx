@@ -61,7 +61,6 @@ const ChoreDetailsScreen = () => {
       description: newDescription,
       frequency: newFrequency,
       energyLevel: newEnergyLevel,
-      lastCompleted: new Date().toISOString(),
     };
 
     const choreRef = doc(database, "chores", chore.id);
