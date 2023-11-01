@@ -21,6 +21,7 @@ import { Chore } from '../../store/choreSlice';
 import { Household } from '../../store/houseHoldSlice';
 import { Profile } from '../../store/profileSlice';
 import OptionsButton from '../OptionsButton';
+import { getHouseholdById } from '../../api/household';
 
 export const emojiMap: Record<string, string> = {
   fox: '🦊',
@@ -52,30 +53,43 @@ export default function HouseholdListComponent({
   useFocusEffect(
     React.useCallback(() => {
       async function fetchData() {
-        const choresCollection = collection(database, 'chores');
-        const choresData: Chore[] = [];
-
-        for (const choreId of household.chores) {
-          const choreRef = doc(choresCollection, choreId);
-          const choreDoc = await getDoc(choreRef);
-          if (choreDoc.exists()) {
-            const chore = { id: choreDoc.id, ...choreDoc.data() } as Chore;
-            choresData.push(chore);
+        try {
+          // Await the asynchronous call to getHouseholdById
+          const updatedHousehold = await getHouseholdById(household.id);
+          
+          // Check if updatedHousehold is null or undefined before proceeding
+          if (!updatedHousehold) {
+            console.error('Failed to fetch updated household data');
+            return;
           }
+          
+          const choresCollection = collection(database, 'chores');
+          const choresData: Chore[] = [];
+  
+          // Use updatedHousehold.chores instead of household.chores
+          for (const choreId of updatedHousehold.chores) {
+            const choreRef = doc(choresCollection, choreId);
+            const choreDoc = await getDoc(choreRef);
+            if (choreDoc.exists()) {
+              const chore = { id: choreDoc.id, ...choreDoc.data() } as Chore;
+              choresData.push(chore);
+            }
+          }
+  
+          setChores(choresData);
+          const fetchedCompletedChores = await getCompletedChoresByHousehold(updatedHousehold.id);
+          setCompletedChores(fetchedCompletedChores);
+          const fetchedProfiles = await getProfiles();
+          setProfiles(fetchedProfiles);
+        } catch (error) {
+          console.error('Error fetching data:', error);
         }
-
-        setChores(choresData);
-        const fetchedCompletedChores = await getCompletedChoresByHousehold(
-          household.id
-        );
-        setCompletedChores(fetchedCompletedChores);
-        const fetchedProfiles = await getProfiles();
-        setProfiles(fetchedProfiles);
       }
 
       fetchData();
-    }, [household.chores])
-  );
+    }, [household.id])  // Dependency array updated to include household.id
+);
+
 
   const getDaysLeftToDoChore = (lastCompleted: Date, frequency: number) => {
     const nextDueDate = new Date(lastCompleted);
