@@ -80,14 +80,13 @@ const CreateProfileComponent = ({ navigation, route }: Props) => {
   const [unavailableEmojis, setUnavailableEmojis] = useState<string[]>([]);
 
   const fetchData = async () => {
-
+    
     let memberIdArray: string[] = [];
     let fetchedProfiles: (Profile | null)[] = [];
-    let unavailableEmojis: string[] = [];
-
+    
     try {
-      const house = await getHouseholdById(currentHousehold);
-      if (house && house.members) {
+      const house = await getHouseholdById(household.id);
+      if (house && Array.isArray(house.members)) {
 
         memberIdArray = [...house.members];
 
@@ -125,6 +124,7 @@ const CreateProfileComponent = ({ navigation, route }: Props) => {
     }));
   };
   const handleButtonPress = async () => {
+    console.log(selectedEmoji);
     const avatarString = convertEmojiToString(profileData.avatar);
     const profileDoc = await addProfile({ ...profileData, avatar: avatarString });
     const householdRef = doc(database, 'households', household.id);
