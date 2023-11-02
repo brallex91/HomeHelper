@@ -163,24 +163,24 @@ const ChoreDetailsScreen = () => {
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         <Card style={styles.cardName}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "flex-start",
-                width: "100%",
-              }}
-            >
-              <Text style={styles.subtitle}>Titel: </Text>
-              <View>
-                <TextInput
-                  value={newName}
-                  onChangeText={setNewName}
-                  style={styles.input}
-                  multiline={true}
-                  textAlignVertical="top"
-                />
-              </View>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              width: "100%",
+            }}
+          >
+            <Text style={styles.subtitle}>Titel: </Text>
+            <View>
+              <TextInput
+                value={newName}
+                onChangeText={setNewName}
+                style={styles.input}
+                multiline={true}
+                textAlignVertical="top"
+              />
             </View>
+          </View>
         </Card>
 
         <Card style={styles.cardDescription}>
@@ -266,7 +266,7 @@ const ChoreDetailsScreen = () => {
         duration={2000}
         style={styles.snackbar}
       >
-        <Text>{chore.name} Completed!!!</Text>
+        <Text style={styles.snackbarText}>{chore.name} Completed!!!</Text>
       </Snackbar>
     </View>
   );
@@ -334,6 +334,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     backgroundColor: "green",
+    justifyContent: "center",
+  },
+  snackbarText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
