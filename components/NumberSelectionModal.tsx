@@ -1,3 +1,4 @@
+
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Button, Dialog, Portal } from "react-native-paper";
@@ -24,7 +25,11 @@ const NumberSelectionModal = ({
                 key={number}
                 mode="contained"
                 style={styles.numberSelectionButton}
-                onPress={() => selectNumber(number)}
+                onPress={() => {
+                  selectNumber(number); 
+                  closeModal(); 
+                }}
+                
               >
                 {number}
               </Button>
