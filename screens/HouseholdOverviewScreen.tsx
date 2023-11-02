@@ -46,18 +46,20 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
 
   useFocusEffect(
     React.useCallback(() => {
-      setModalVisible(false);
-      async function fetchHouseholds() {
+      async function fetchData() {
         setIsLoading(true);
         try {
           const householdData = await getHouseholds();
           setHouseholds(householdData);
+          const profilesData = await getProfiles(); // Fetch profiles on focus as well
+          setProfiles(profilesData);
         } catch (error) {
-          console.error("Error fetching households: ", error);
+          console.error("Error fetching data: ", error);
         }
         setIsLoading(false);
       }
-      fetchHouseholds();
+
+      fetchData();
     }, [])
   );
 
@@ -70,7 +72,6 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
         console.error("Error fetching profiles: ", error);
       }
     }
-
     fetchProfiles();
   }, []);
 
