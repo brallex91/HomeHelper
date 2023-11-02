@@ -48,7 +48,6 @@ const ChoreDetailsScreen = () => {
   const [isEnergyLevelSelectionVisible, setEnergyLevelSelectionVisible] =
     useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [playbackStatus, setPlaybackStatus] = useState(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [confettiVisible, setConfettiVisible] = useState(false);
 
@@ -176,7 +175,7 @@ const ChoreDetailsScreen = () => {
     setConfettiVisible(true);
     setTimeout(() => {
       setConfettiVisible(false);
-    }, 4000);
+    }, 3500);
   };
 
   if (isLoading) {
