@@ -18,7 +18,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Button, Card, Snackbar, useTheme } from "react-native-paper";
+import ConfettiCannon from "react-native-confetti-cannon";
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Snackbar,
+  useTheme,
+} from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import NumberSelectionModal from "../components/NumberSelectionModal";
 import { auth, database } from "../database/firebaseConfig";
@@ -40,7 +47,10 @@ const ChoreDetailsScreen = () => {
     useState(false);
   const [isEnergyLevelSelectionVisible, setEnergyLevelSelectionVisible] =
     useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [playbackStatus, setPlaybackStatus] = useState(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [confettiVisible, setConfettiVisible] = useState(false);
 
   useEffect(() => {
     if (chore) {
@@ -89,6 +99,7 @@ const ChoreDetailsScreen = () => {
     console.log(`User ID: ${userId}`);
 
     try {
+      setIsLoading(true);
       const householdQuery = query(
         collection(database, "households"),
         where("chores", "array-contains", chore.id)
@@ -129,10 +140,12 @@ const ChoreDetailsScreen = () => {
         profileId: userProfile.id,
         householdId: householdId,
       };
-
-      await addDoc(collection(database, "completedChores"), completedChoreData);
-      await playCompletionSound();
-      setSnackbarVisible(true);
+      await Promise.all([
+        addDoc(collection(database, "completedChores"), completedChoreData),
+      ]);
+      shootConfetti();
+      playCompletionSound(), setSnackbarVisible(true);
+      setIsLoading(false);
       console.log("Completed chore added to database:", completedChoreData);
     } catch (error) {
       console.error("Error completing chore:", error);
@@ -159,28 +172,44 @@ const ChoreDetailsScreen = () => {
     }
   };
 
+  const shootConfetti = () => {
+    setConfettiVisible(true);
+    setTimeout(() => {
+      setConfettiVisible(false);
+    }, 4000);
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text>Completing {chore.name}!!!</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
         <Card style={styles.cardName}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "flex-start",
-                width: "100%",
-              }}
-            >
-              <Text style={styles.subtitle}>Titel: </Text>
-              <View>
-                <TextInput
-                  value={newName}
-                  onChangeText={setNewName}
-                  style={styles.input}
-                  multiline={true}
-                  textAlignVertical="top"
-                />
-              </View>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              width: "100%",
+            }}
+          >
+            <Text style={styles.subtitle}>Titel: </Text>
+            <View>
+              <TextInput
+                value={newName}
+                onChangeText={setNewName}
+                style={styles.input}
+                multiline={true}
+                textAlignVertical="top"
+              />
             </View>
+          </View>
         </Card>
 
         <Card style={styles.cardDescription}>
@@ -266,8 +295,18 @@ const ChoreDetailsScreen = () => {
         duration={2000}
         style={styles.snackbar}
       >
-        <Text>{chore.name} Completed!!!</Text>
+        <Text style={styles.snackbarText}>{chore.name} Completed!!!</Text>
       </Snackbar>
+      {confettiVisible && (
+        <ConfettiCannon
+          count={200}
+          origin={{ x: -10, y: 0 }}
+          autoStart={true}
+          explosionSpeed={350}
+          fallSpeed={2500}
+          colors={["#ff0", "#f00", "#00f", "#0f0"]}
+        />
+      )}
     </View>
   );
 };
@@ -334,6 +373,26 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     backgroundColor: "green",
+    justifyContent: "center",
+  },
+  snackbarText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  circle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

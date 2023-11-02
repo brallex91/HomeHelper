@@ -1,5 +1,5 @@
+import { Audio } from "expo-av";
 import React, { useState } from "react";
-import { Button, Card } from "react-native-paper";
 import {
   ScrollView,
   StyleSheet,
@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Button, Card, Snackbar } from "react-native-paper";
 import { useDispatch } from "react-redux";
 import { addChore } from "../store/choreSlice";
 
-import { database } from "../database/firebaseConfig";
+import { useRoute } from "@react-navigation/native";
 import {
   addDoc,
   arrayUnion,
@@ -19,10 +20,12 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { useRoute } from "@react-navigation/native";
+import { database } from "../database/firebaseConfig";
 import NumberSelectionModal from "./NumberSelectionModal";
 
 const AddChoreComponent = () => {
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const route = useRoute();
 
   const [isFrequencySelectionVisible, setFrequencySelectionVisible] =
@@ -68,11 +71,30 @@ const AddChoreComponent = () => {
         dateCreated: new Date().toISOString(),
         lastCompleted: new Date().toISOString(),
       });
+      await playCompletionSound();
+      setSnackbarMessage(`${newChore.name} Added to Chores!!!`);
+      setSnackbarVisible(true);
     } catch (error) {
       console.error("Error adding chore to Firestore:", error);
     }
     console.log("Date created:", choreData.dateCreated);
     console.log("Last completed:", choreData.lastCompleted);
+  };
+
+  const playCompletionSound = async () => {
+    const sound = new Audio.Sound();
+    try {
+      await sound.loadAsync(require("../assets/ChoreAdded.mp3"));
+      await sound.playAsync();
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          await sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.error("Failed to play completion sound", error);
+    }
   };
 
   return (
@@ -102,29 +124,29 @@ const AddChoreComponent = () => {
             </View>
           </TouchableOpacity>
         </Card>
-                  
+
         <Card style={styles.cardDescription}>
-        <TouchableOpacity style={{ width: "100%" }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-start",
-              width: "100%",
-            }}
-          >
-            <Text style={styles.subtitle}>Beskrivning: </Text>
-            <View style={{ flex: 1 }}>
-              <TextInput
-                value={choreData.description}
-                style={styles.input}
-                multiline={true}
-                textAlignVertical="top"
-                onChangeText={(text) =>
-                  setChoreData({ ...choreData, description: text })
-                }
-              />
+          <TouchableOpacity style={{ width: "100%" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+                width: "100%",
+              }}
+            >
+              <Text style={styles.subtitle}>Beskrivning: </Text>
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  value={choreData.description}
+                  style={styles.input}
+                  multiline={true}
+                  textAlignVertical="top"
+                  onChangeText={(text) =>
+                    setChoreData({ ...choreData, description: text })
+                  }
+                />
+              </View>
             </View>
-          </View>
           </TouchableOpacity>
         </Card>
 
@@ -181,6 +203,14 @@ const AddChoreComponent = () => {
           setChoreData({ ...choreData, energyLevel: selectedNumber.toString() })
         }
       />
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={2000}
+        style={styles.snackbar}
+      >
+        <Text style={styles.snackbarText}>{snackbarMessage}</Text>
+      </Snackbar>
     </View>
   );
 };
@@ -242,6 +272,18 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 10,
+  },
+  snackbar: {
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: "green",
+    justifyContent: "center",
+  },
+  snackbarText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
