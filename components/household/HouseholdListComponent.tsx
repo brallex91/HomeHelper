@@ -129,7 +129,7 @@ export default function HouseholdListComponent({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return completedChores
+    const avatars = completedChores
       .filter((c) => {
         const completedDate = new Date(c.date);
         completedDate.setHours(0, 0, 0, 0);
@@ -142,8 +142,13 @@ export default function HouseholdListComponent({
         return profile && emojiMap[profile.avatar as keyof typeof emojiMap]
           ? emojiMap[profile.avatar as keyof typeof emojiMap]
           : "❓";
-      })
-      .join(" ");
+      });
+
+    if (avatars.length > 5) {
+      return avatars.slice(0, 6).join("") + "";
+    }
+
+    return avatars.join("");
   };
 
   const navigateToAddNewChore = () => {
