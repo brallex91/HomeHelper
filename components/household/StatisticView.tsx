@@ -75,16 +75,15 @@ const getChoreStatistics = async (
     const profileId = chore.profileId.trim();
     const avatar = profileAvatarMap[profileId] as EmojiKeys;
     const energy = choreIdMap[chore.choreId]?.energyLevel || 0;
-
     const existingStat = statisticsMap.get(profileId);
 
     if (existingStat) {
       existingStat.completed++;
     } else {
-      statisticsMap.set(profileId, { profileId, completed: 1, avatar });
+      statisticsMap.set(profileId, { profileId, completed: 1 + energy, avatar });
     }
   });
-
+  console.log(statisticsMap);
   return Array.from(statisticsMap.values());
 };
 
@@ -142,7 +141,7 @@ const getHouseholdChoreStatistics = async (householdId: string) => {
     }
 
     if (!statistics[choreName][profileName]) {
-      statistics[choreName][profileName] = { count: 0, avatar };
+      statistics[choreName][profileName] = { count: 0 + energy, avatar };
     }
 
     statistics[choreName][profileName].count++;
