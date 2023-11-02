@@ -1,3 +1,4 @@
+import { useFocusEffect } from "@react-navigation/native";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
@@ -176,6 +177,20 @@ const StatisticView: React.FC<{ householdId: string }> = ({ householdId }) => {
   const choreDataItems = React.useMemo(
     () => mapChoreStatisticsToDataItems(householdChoreStatistics),
     [householdChoreStatistics]
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchStatistics() {
+        const choreStats = await getChoreStatistics(householdId);
+        const householdChoreStats =
+          await getHouseholdChoreStatistics(householdId);
+        setChoreStatistics(choreStats);
+        setHouseholdChoreStatistics(householdChoreStats);
+      }
+
+      fetchStatistics();
+    }, [householdId])
   );
 
   return (
