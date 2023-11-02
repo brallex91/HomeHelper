@@ -155,14 +155,16 @@ export default function HouseholdListComponent({
     navigation.navigate("ChoreDetails");
   };
 
-  const goBack = () => {
-    navigation.goBack();
+  const returnToOverview = () => {
+    navigation.navigate("HouseholdOverview", {
+      householdId: household.id,
+    });
   };
 
   const BottomButtonBar = () => (
     <View style={styles.buttonBarContainer}>
       <View style={styles.optionsButtonContainer}>
-        <OptionsButton size={36} onGoBack={goBack} />
+        <OptionsButton size={36} onGoBack={returnToOverview} />
       </View>
       <View style={styles.buttonBar}>
         <Button
@@ -183,7 +185,7 @@ export default function HouseholdListComponent({
           labelStyle={styles.buttonLabel}
           contentStyle={styles.buttonContent}
         >
-          Ändra
+          Ändrar
         </Button>
       </View>
     </View>
