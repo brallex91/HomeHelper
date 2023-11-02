@@ -46,6 +46,7 @@ export default function HouseholdOverviewScreen({ navigation }: Props) {
 
   useFocusEffect(
     React.useCallback(() => {
+      setModalVisible(false);
       async function fetchHouseholds() {
         setIsLoading(true);
         try {
