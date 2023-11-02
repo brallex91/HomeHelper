@@ -162,43 +162,58 @@ const ChoreDetailsScreen = () => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.cardContainer}>
-        <Card style={styles.card}>
-          <Card.Title
-            title={
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text>Name: </Text>
+        <Card style={styles.cardName}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+                width: "100%",
+              }}
+            >
+              <Text style={styles.subtitle}>Titel: </Text>
+              <View>
                 <TextInput
                   value={newName}
                   onChangeText={setNewName}
                   style={styles.input}
+                  multiline={true}
+                  textAlignVertical="top"
                 />
               </View>
-            }
-          />
+            </View>
+        </Card>
+
+        <Card style={styles.cardDescription}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              width: "100%",
+            }}
+          >
+            <Text style={styles.subtitle}>Beskrivning: </Text>
+            <View style={{ flex: 1 }}>
+              <TextInput
+                value={newDescription}
+                onChangeText={setNewDescription}
+                style={styles.input}
+                multiline={true}
+                textAlignVertical="top"
+              />
+            </View>
+          </View>
         </Card>
         <Card style={styles.card}>
           <Card.Title
-            title={
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text>Description: </Text>
-                <TextInput
-                  value={newDescription}
-                  onChangeText={setNewDescription}
-                  style={styles.input}
-                />
-              </View>
-            }
-          />
-        </Card>
-        <Card style={styles.card}>
-          <Card.Title
-            title="Frequency"
+            title="Återkommer:"
             right={() => (
               <TouchableOpacity
                 onPress={() => setFrequencySelectionVisible(true)}
               >
-                <View style={styles.frequency}>
-                  <Text>{newFrequency} days</Text>
+                <View style={styles.frequencyContainer}>
+                  <Text style={styles.text}>var</Text>
+                  <Text style={styles.frequencyText}>{newFrequency} </Text>
+                  <Text style={styles.text}>dag</Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -206,7 +221,7 @@ const ChoreDetailsScreen = () => {
         </Card>
         <Card style={styles.card}>
           <Card.Title
-            title="Energy Level"
+            title="Värde:"
             right={() => (
               <TouchableOpacity
                 onPress={() => setEnergyLevelSelectionVisible(true)}
@@ -224,7 +239,7 @@ const ChoreDetailsScreen = () => {
           onPress={handleUpdateChore}
           style={styles.button}
         >
-          Save Changes
+          Spara
         </Button>
         <Button
           icon="check"
@@ -232,7 +247,7 @@ const ChoreDetailsScreen = () => {
           onPress={handleCompleteChore}
           style={styles.button}
         >
-          Mark as Complete
+          Markera som klar
         </Button>
       </ScrollView>
       <NumberSelectionModal
@@ -264,18 +279,48 @@ const styles = StyleSheet.create({
   card: {
     marginVertical: 8,
   },
+  cardName: {
+    width: "100%",
+    height: "10%",
+  },
+  cardDescription: {
+    flex: 1,
+    marginVertical: 8,
+    width: "100%",
+    height: 100,
+  },
   input: {
     flex: 1,
-    marginHorizontal: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    width: "100%",
+    minHeight: 80,
+    maxHeight: 500,
+    padding: 2,
+    borderRadius: 5,
   },
-  frequency: {
-    marginRight: 10,
-    padding: 6,
-    backgroundColor: "#ddd",
-    borderRadius: 10,
+  frequencyContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
+  text: {
+    marginRight: 5,
+  },
+  frequencyText: {
+    marginRight: 5,
+    paddingLeft: 5,
+    paddingRight: 2,
+    padding: 1,
+    backgroundColor: "red",
+    borderRadius: 15,
+    color: "white",
+    textAlign: "center",
+  },
+  subtitle: {
+    position: "relative",
+    fontSize: 14,
+    color: "gray",
+    marginLeft: 5,
+  },
+
   energyLevel: {
     marginRight: 10,
     padding: 6,
@@ -288,7 +333,7 @@ const styles = StyleSheet.create({
   snackbar: {
     position: "absolute",
     bottom: 0,
-    backgroundColor: "green", // Eller vilken färg du föredrar
+    backgroundColor: "green",
   },
 });
 
