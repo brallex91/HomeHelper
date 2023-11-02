@@ -46,7 +46,7 @@ const AddChoreComponent = () => {
   const handleAddChore = async () => {
     const newChore = {
       description: choreData.description,
-      energyLevel: choreData.energyLevel,
+      energyLevel: parseInt(choreData.energyLevel),
       frequency: choreData.frequency,
       name: choreData.name,
       dateCreated: choreData.dateCreated,
