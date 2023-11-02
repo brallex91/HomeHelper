@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
-import { auth, database } from "../database/firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
-import { useDispatch } from "react-redux";
-import { addHousehold } from "../store/houseHoldSlice";
-import { Button, useTheme, TextInput } from 'react-native-paper';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { addDoc, collection } from "firebase/firestore";
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Button, TextInput, useTheme } from 'react-native-paper';
+import { useDispatch } from "react-redux";
+import { auth, database } from "../database/firebaseConfig";
 import { RootStackParamList } from "../navigation/RootNavigator";
+import { addHousehold } from "../store/houseHoldSlice";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddNewHousehold'>;
 
@@ -43,10 +43,9 @@ const CreateHousehold = ({ navigation, route }: Props) => {
         household,
       );
   
-      console.log("Household created with ID:", docRef.id);
-  
+      console.log("Household created with ID:", docRef.id);  
       dispatch(addHousehold({ ...household, id: docRef.id }));
-  
+      
       // Navigate to the CreateProfileComponent screen, passing the household object as a parameter
       navigation.navigate('CreateProfileScreen', { household: { ...household, id: docRef.id } });
       console.log("Sendinghousehold:",  household);
