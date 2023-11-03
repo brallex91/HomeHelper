@@ -1,4 +1,3 @@
-// GlobalContext.js
 import React, { createContext, useContext, useState } from 'react';
 
 const GlobalContext = createContext();
@@ -15,8 +14,10 @@ export const GlobalProvider = ({ children }) => {
     currentProfile,
     setCurrentProfile,
     currentHousehold,
-    setCurrentHousehold
+    setCurrentHousehold,
   };
 
-  return <GlobalContext.Provider value={value}>{children}</GlobalContext.Provider>;
+  return (
+    <GlobalContext.Provider value={value}>{children}</GlobalContext.Provider>
+  );
 };

@@ -1,15 +1,13 @@
-
-
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Chore {
   id: string;
   name: string;
   description: string;
-  frequency: number; // Antal dagar
-  energyLevel: number; // 1, 2, 4, 6 eller 8
-  lastCompleted: Date | undefined  // Datum när sysslan senast slutfördes
-  dateCreated: Date; // Datum när sysslan skapades
+  frequency: number;
+  energyLevel: number;
+  lastCompleted: Date | undefined;
+  dateCreated: Date;
 }
 
 export interface ChoresState {
@@ -21,7 +19,7 @@ const initialState: ChoresState = {
 };
 
 export const choresSlice = createSlice({
-  name: "chores",
+  name: 'chores',
   initialState,
   reducers: {
     addChore: (state, action: PayloadAction<Chore>) => {
